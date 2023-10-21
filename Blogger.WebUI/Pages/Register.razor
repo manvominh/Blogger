@@ -1,0 +1,101 @@
+﻿@page "/register"
+
+@using Blogger.Application.Dtos
+@* //@inject IHttpClientFactory _httpClientFactory *@
+@inject NavigationManager _navigationManager
+@inject IToastService _toastService
+
+<div class="section">
+	<div class="container">
+		<div class="row">
+			<div class="col-lg-8" >
+				<EditForm EditContext="@editContext" OnValidSubmit="RegisterUser" @onreset="HandleReset">
+            
+						<DataAnnotationsValidator />
+					<div class="row">
+						<div class="col-12 mb-3">
+							<label class="form-label">Email address</label>
+							<InputText @bind-Value="register.Email" class="form-control" placeholder="Your Email" />
+							<ValidationMessage For="@(() => register.Email)" />
+						</div>
+						<div class="col-6 mb-3">
+							<label class="form-label">Password</label>
+							<InputText @bind-Value="register.Password" class="form-control" placeholder="Password" />
+							<ValidationMessage For="@(() => register.Password)" />
+						</div>
+						<div class="col-6 mb-3">
+							<label class="form-label">Confirm Password</label>
+							<InputText @bind-Value="register.ConfirmPassword" class="form-control" placeholder="Confirm Password" />
+							<ValidationMessage For="@(() => register.ConfirmPassword)" />
+						</div>
+						<div class="col-6 mb-3">
+							<label class="form-label">First Name</label>
+							<InputText @bind-Value="register.FirstName" class="form-control" placeholder="First Name" />
+							<ValidationMessage For="@(() => register.FirstName)" />
+						</div>
+						<div class="col-6 mb-3">
+							<label class="form-label">Last Name</label>
+							<InputText @bind-Value="register.LastName" class="form-control" placeholder="Last Name" />
+							<ValidationMessage For="@(() => register.LastName)" />
+						</div>
+						<div class="col-6 mb-3">
+							<label class="form-label">Gender</label>
+							<InputSelect @bind-Value="register.Gender" class="form-control" placeholder="Gender">
+								<option value=""></option>
+								<option value="Mr">Mr</option>
+								<option value="Mrs">Mrs</option>
+								<option value="Miss">Miss</option>
+								<option value="Ms">Ms</option>
+							</InputSelect>
+							<ValidationMessage For="@(() => register.Gender)" />
+						</div>
+						<div class="col-6 mb-3">
+							<label class="form-label">Date Of Birth</label>
+							<InputDate @bind-Value="register.DateOfBirth" class="form-control" placeholder="Date of Birth" />
+							<ValidationMessage For="@(() => register.DateOfBirth)" />
+						</div>
+						<div class="col-12 mb-3">
+							<InputTextArea @bind-Value="register.Address" class="form-control" placeholder="Address" />
+							<ValidationMessage For="@(() => register.Address)" />
+						</div>
+
+						<div class="col-12">
+							<input type="submit" value="Send Message" class="btn btn-primary">
+						</div>
+					</div>
+					</EditForm>
+			</div>
+		</div>
+	</div>
+</div>
+
+@code {
+    UserRegistrationDto register = new UserRegistrationDto();
+	private EditContext editContext;
+
+	protected override void OnInitialized()
+	{
+		editContext = new EditContext(register);
+	}
+    private async Task RegisterUser()
+    {
+        _toastService.ShowSuccess("Register successfully.");
+        // var httpClient = _httpClientFactory.CreateClient("blog");
+        // var response = await httpClient.PostAsJsonAsync<UserRegistrationDto>("/api/User/register", register);
+
+        // if (response.IsSuccessStatusCode)
+        // {
+        //     _toastService.ShowSuccess("Register successfully");
+        //     _navigationManager.NavigateTo("/");
+        // }
+        // else
+        // {
+        //     _toastService.ShowError("Error on calling API");
+        // }
+    }
+	private void HandleReset()
+	{
+		register = new UserRegistrationDto();
+		editContext = new EditContext(register);
+	}
+}
