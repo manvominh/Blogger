@@ -30,7 +30,7 @@ namespace Blogger.Application.Dtos
 
         [Required(ErrorMessage = "Please choose Gender.")]
         public string Gender { get; set; }
-        public DateTime DateOfBirth { get; set; } = DateTime.Now;
-        public string Address { get; set; }
+        public DateTime? DateOfBirth { get; set; } = DateTime.Now;
+        public string? Address { get; set; }
     }
 }

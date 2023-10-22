@@ -1,7 +1,8 @@
 ﻿@page "/register"
 
 @using Blogger.Application.Dtos
-@* //@inject IHttpClientFactory _httpClientFactory *@
+@inject IHttpClientFactory _httpClientFactory
+@* @inject HttpClient httpClient *@
 @inject NavigationManager _navigationManager
 @inject IToastService _toastService
 
@@ -12,6 +13,11 @@
 				<EditForm EditContext="@editContext" OnValidSubmit="RegisterUser" @onreset="HandleReset">
             
 						<DataAnnotationsValidator />
+					@if (!string.IsNullOrEmpty(APIErrorMessages))
+					{
+						<p class="alert alert-danger">@APIErrorMessages</p>
+					}
+					
 					<div class="row">
 						<div class="col-12 mb-3">
 							<label class="form-label">Email address</label>
@@ -20,12 +26,12 @@
 						</div>
 						<div class="col-6 mb-3">
 							<label class="form-label">Password</label>
-							<InputText @bind-Value="register.Password" class="form-control" placeholder="Password" />
+							<InputText @bind-Value="register.Password" class="form-control" type="password" placeholder="Password" />
 							<ValidationMessage For="@(() => register.Password)" />
 						</div>
 						<div class="col-6 mb-3">
 							<label class="form-label">Confirm Password</label>
-							<InputText @bind-Value="register.ConfirmPassword" class="form-control" placeholder="Confirm Password" />
+							<InputText @bind-Value="register.ConfirmPassword" class="form-control" type="password" placeholder="Confirm Password" />
 							<ValidationMessage For="@(() => register.ConfirmPassword)" />
 						</div>
 						<div class="col-6 mb-3">
@@ -70,28 +76,43 @@
 </div>
 
 @code {
-    UserRegistrationDto register = new UserRegistrationDto();
+	UserRegistrationDto register = new UserRegistrationDto();
 	private EditContext editContext;
+	string APIErrorMessages;
 
 	protected override void OnInitialized()
 	{
 		editContext = new EditContext(register);
 	}
-    private async Task RegisterUser()
-    {
-        _toastService.ShowSuccess("Register successfully.");
-        // var httpClient = _httpClientFactory.CreateClient("blog");
-        // var response = await httpClient.PostAsJsonAsync<UserRegistrationDto>("/api/User/register", register);
+	private async Task RegisterUser()
+	{
+		var httpClient = _httpClientFactory.CreateClient("blog");
+		var response = await httpClient.PostAsJsonAsync<UserRegistrationDto>("/api/Users/register", register);
 
-        // if (response.IsSuccessStatusCode)
-        // {
-        //     _toastService.ShowSuccess("Register successfully");
-        //     _navigationManager.NavigateTo("/");
-        // }
-        // else
-        // {
-        //     _toastService.ShowError("Error on calling API");
-        // }
+		if(response.StatusCode == HttpStatusCode.BadRequest)
+		{
+			var errors = await response.Content.ReadFromJsonAsync<Dictionary<string, List<string>>>();
+			if (errors.Count > 0)
+			{
+				foreach (var item in errors)
+				{
+					foreach (var errorMessage in item.Value)
+					{
+						APIErrorMessages = !string.IsNullOrEmpty(APIErrorMessages) ? $"{APIErrorMessages} | {errorMessage}" : $"{errorMessage}";
+					}
+				}
+			}
+			_toastService.ShowError(APIErrorMessages);
+		}
+		else if (response.IsSuccessStatusCode)
+        {
+            _toastService.ShowSuccess("Register successfully");
+            _navigationManager.NavigateTo("/");
+        }
+        else
+        {
+            _toastService.ShowError("Error on calling API");
+        }
     }
 	private void HandleReset()
 	{

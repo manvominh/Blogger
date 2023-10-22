@@ -30,11 +30,13 @@ namespace Blogger.Infrastructure.Services
             /* Generating JWT Token */
             var tokenExpiryTimeStamp = DateTime.Now.AddMinutes(JWT_TOKEN_VALIDITY_MINS);
             var tokenKey = Encoding.ASCII.GetBytes(JWT_SECURITY_KEY);
-            var claimsIdentity = new ClaimsIdentity(new List<Claim>
-                {
-                    new Claim(ClaimTypes.Email, user.Email),
-                    //new Claim(ClaimTypes.Role, user.Role) 
-                });
+
+			var claimEmailAddress = new Claim(ClaimTypes.Name, user.Email);
+			var claimNameIdentifier = new Claim(ClaimTypes.NameIdentifier, Convert.ToString(user.Id));
+			var claimFirstName = new Claim("FirstName", user.FirstName);
+			var claimLastName = new Claim("LastName", user.LastName);
+
+			var claimsIdentity = new ClaimsIdentity(new[] { claimEmailAddress, claimNameIdentifier, claimFirstName, claimLastName }, "jwtAuth");
             foreach (var role in user.UserRoles)
             {
                 var claim = new Claim(ClaimTypes.Role, role.Role.Name);
@@ -47,7 +49,7 @@ namespace Blogger.Infrastructure.Services
             {
                 Subject = claimsIdentity,
                 Expires = tokenExpiryTimeStamp,
-                SigningCredentials = signingCredentials
+                SigningCredentials = signingCredentials,
             };
 
             var jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
@@ -63,6 +65,39 @@ namespace Blogger.Infrastructure.Services
                 ExpiresIn = (int)tokenExpiryTimeStamp.Subtract(DateTime.Now).TotalSeconds
             };
             return Task.FromResult<UserSession?>(userSession);
+        }
+        public ClaimsPrincipal GetPrincipalFromExpiredToken(string token)
+        {
+            try
+            {
+                //string abc = token.Replace("'", "");
+                var key = Encoding.UTF8.GetBytes(JWT_SECURITY_KEY);
+                var tokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(key),
+                    ValidateIssuer = false,
+                    ValidateAudience = false
+                };
+                var tokenHandler = new JwtSecurityTokenHandler();
+                SecurityToken securityToken;
+
+                //validating the token
+                var principle = tokenHandler.ValidateToken(token, tokenValidationParameters, out securityToken);
+                JwtSecurityToken jwtSecurityToken = securityToken as JwtSecurityToken;
+                if (jwtSecurityToken == null || !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    throw new SecurityTokenException("Invalid token");
+                }
+
+                return principle;
+            }
+            catch (Exception ex)
+            {
+                //logging the error and returning null
+                Console.WriteLine("Exception : " + ex.Message);
+                return null;
+            }
         }
     }
 }
