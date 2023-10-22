@@ -61,7 +61,7 @@ namespace Blogger.WebUI
             var email = principle.FindFirst(ClaimTypes.Email)?.Value;
             
             var httpClient = _httpClientFactory.CreateClient("blog");
-            var response = await httpClient.PostAsJsonAsync<string>("/api/User/getuserbyemail", email);
+            var response = await httpClient.PostAsJsonAsync<string>("/api/Users/GetUserDetailsByEmail", email);
             var user = await response.Content.ReadFromJsonAsync<User>();
             return user;
         }
