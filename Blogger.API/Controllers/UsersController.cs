@@ -27,7 +27,7 @@ namespace Blogger.API.Controllers
         [HttpPost]
         [AllowAnonymous]
         [Route("register")]
-        public async Task<IActionResult> Register(UserRegistrationDto userRegistration)
+        public async Task<IActionResult> Register([FromBody] UserRegistrationDto userRegistration)
         {
             var result = await _userService.Register(userRegistration);
             if (result.IsUserRegistered)
@@ -41,7 +41,7 @@ namespace Blogger.API.Controllers
         [AllowAnonymous]
         [HttpPost]
         [Route("login")]
-        public async Task<IActionResult> Login(LoginDto loginDto)
+        public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
         {
             var result = await _userService.Login(loginDto);
             if (result.IsLoginSuccess)
@@ -53,7 +53,8 @@ namespace Blogger.API.Controllers
         }
         [AllowAnonymous]
         [HttpPost]
-        public async Task<IActionResult> GetUserDetails(string email)
+        [Route("GetUserDetailsByEmail")]
+        public async Task<IActionResult> GetUserDetailsByEmail([FromBody] string email)
         {
             var result = await _userService.GetByEmail(email);
             if (result != null)

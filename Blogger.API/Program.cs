@@ -51,6 +51,11 @@ var _loggrer = new LoggerConfiguration()
 .CreateLogger();
 builder.Logging.AddSerilog(_loggrer);
 
+builder.Services.AddControllersWithViews()
+    .AddNewtonsoftJson(options =>
+    options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
+);
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

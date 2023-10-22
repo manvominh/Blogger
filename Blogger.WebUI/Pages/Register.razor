@@ -5,7 +5,7 @@
 @* @inject HttpClient httpClient *@
 @inject NavigationManager _navigationManager
 @inject IToastService _toastService
-
+<h3>Register</h3>
 <div class="section">
 	<div class="container">
 		<div class="row">
@@ -15,7 +15,7 @@
 						<DataAnnotationsValidator />
 					@if (!string.IsNullOrEmpty(APIErrorMessages))
 					{
-						<p class="alert alert-danger">@APIErrorMessages</p>
+					<p class="text-danger">@APIErrorMessages</p>
 					}
 					
 					<div class="row">
@@ -78,7 +78,7 @@
 @code {
 	UserRegistrationDto register = new UserRegistrationDto();
 	private EditContext editContext;
-	string APIErrorMessages;
+	private string APIErrorMessages;
 
 	protected override void OnInitialized()
 	{

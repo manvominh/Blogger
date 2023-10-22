@@ -31,7 +31,7 @@ namespace Blogger.Infrastructure.Services
             var tokenExpiryTimeStamp = DateTime.Now.AddMinutes(JWT_TOKEN_VALIDITY_MINS);
             var tokenKey = Encoding.ASCII.GetBytes(JWT_SECURITY_KEY);
 
-			var claimEmailAddress = new Claim(ClaimTypes.Name, user.Email);
+			var claimEmailAddress = new Claim(ClaimTypes.Email, user.Email);
 			var claimNameIdentifier = new Claim(ClaimTypes.NameIdentifier, Convert.ToString(user.Id));
 			var claimFirstName = new Claim("FirstName", user.FirstName);
 			var claimLastName = new Claim("LastName", user.LastName);

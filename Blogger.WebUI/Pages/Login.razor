@@ -1,31 +1,48 @@
 ﻿@page "/login"
 
+
 @using Blogger.Application.Dtos
+
+@inject NavigationManager _navigationManager
+@inject IJSRuntime js
+@inject ILocalStorageService _localStorageService
+
+@inject AuthenticationStateProvider authStateProvider
+@inject IHttpClientFactory _httpClientFactory;
+@inject IToastService _toastService
 
 <section class="vh-100">
     <div class="container-fluid h-custom">
         <div class="row d-flex justify-content-center align-items-center h-100">
             <div class="col-md-8 col-lg-6 col-xl-4 offset-xl-1">
-                <form>
+                <EditForm EditContext="@editContext" OnValidSubmit="Authenticate">
+					<DataAnnotationsValidator />
+					@if (!string.IsNullOrEmpty(APIErrorMessages))
+					{
+					<p class="text-danger">@APIErrorMessages</p>
+					}
                     <div class="d-flex flex-row align-items-center justify-content-center justify-content-lg-start">
-                        <p class="lead fw-normal mb-0 me-3">Sign in</p>
+                       @*  <p class="lead fw-normal mb-0 me-3">Sign in</p> *@
+                        <h3>Sign in</h3>
                     </div>
 
                     <!-- Email input -->
                     <div class="form-outline mb-4">
-                        <input type="email" id="form3Example3" class="form-control form-control-lg"
-                               placeholder="Enter a valid email address" />
                         <label class="form-label" for="form3Example3">Email address</label>
+                        <input type="email" id="form3Example3" @bind="loginDto.Email" class="form-control form-control-lg"
+                               placeholder="Enter a valid email address" />
+                        <ValidationMessage For="@(() => loginDto.Email)" />
                     </div>
 
                     <!-- Password input -->
                     <div class="form-outline mb-3">
-                        <input type="password" id="form3Example4" class="form-control form-control-lg"
-                               placeholder="Enter password" />
                         <label class="form-label" for="form3Example4">Password</label>
+                        <input type="password" id="form3Example4" @bind="loginDto.Password" class="form-control form-control-lg"
+                               placeholder="Enter password" />
+                        <ValidationMessage For="@(() => loginDto.Password)" />
                     </div>
 
-                    <div class="d-flex justify-content-between align-items-center">
+                    @* <div class="d-flex justify-content-between align-items-center">
                         <!-- Checkbox -->
                         <div class="form-check mb-0">
                             <input class="form-check-input me-2" type="checkbox" value="" id="form2Example3" />
@@ -34,20 +51,20 @@
                             </label>
                         </div>
                         <a href="#!" class="text-body">Forgot password?</a>
-                    </div>
+                    </div> *@
 
                     <div class="text-center text-lg-start mt-4 pt-2">
                         <button type="button" class="btn btn-primary btn-lg"
-                                style="padding-left: 2.5rem; padding-right: 2.5rem;">
+                                style="padding-left: 2.5rem; padding-right: 2.5rem;" @onclick="Authenticate">
                             Login
                         </button>
                         <p class="small fw-bold mt-2 pt-1 mb-0">
-                            Don't have an account? <a href="#!"
+                            Don't have an account? <a href="/register"
                                                       class="link-danger">Register</a>
                         </p>
                     </div>
 
-                </form>
+                </EditForm>
             </div>
         </div>
     </div>
@@ -56,4 +73,62 @@
 
 @code {
     LoginDto loginDto = new LoginDto();
+    private EditContext editContext;
+    private string APIErrorMessages;
+    [CascadingParameter]
+    public Task<AuthenticationState> authenticationState { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        editContext = new EditContext(loginDto);
+        var authState = await authenticationState;
+        var user = authState.User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            _navigationManager.NavigateTo("/profile");
+        }
+    }
+
+    private async Task Authenticate()
+    {
+        var httpClient = _httpClientFactory.CreateClient("blog");
+        var response = await httpClient.PostAsJsonAsync<LoginDto>("/api/Users/Login", loginDto);
+        //var authState = await authenticationState;
+        if (response.StatusCode == HttpStatusCode.BadRequest)
+        {
+            var errors = await response.Content.ReadFromJsonAsync<Dictionary<string, List<string>>>();
+            if (errors.Count > 0)
+            {
+                foreach (var item in errors)
+                {
+                    foreach (var errorMessage in item.Value)
+                    {
+                        APIErrorMessages = $"{errorMessage}";
+                    }
+                }
+            }
+        }
+        else if (response.IsSuccessStatusCode)
+        {
+            var sessionUser = await response.Content.ReadFromJsonAsync<UserSession>();
+
+            if (sessionUser != null && sessionUser.Token != string.Empty)
+            {
+                await _localStorageService.SetItemAsync("jwt_token", sessionUser.Token);
+                var customAuthStateProvider = (CustomAuthenticationStateProvider)authStateProvider;
+                customAuthStateProvider.NotifyAuthState();
+                _toastService.ShowSuccess("Login successfully.");
+                _navigationManager.NavigateTo("/", true);
+            }
+            else
+            {
+                _toastService.ShowError("Invalid username or password");
+            }
+        }
+        else //if (response.StatusCode == HttpStatusCode.Unauthorized)
+        {
+            _toastService.ShowError("Login Failed Plase try after some time");
+        }
+    }
 }

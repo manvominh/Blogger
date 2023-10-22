@@ -32,7 +32,7 @@ namespace Blogger.WebUI
             if (user != null && user.Email != null)
             {
                 //create a claims
-                var claimEmailAddress = new Claim(ClaimTypes.Name, user.Email);
+                var claimEmailAddress = new Claim(ClaimTypes.Email, user.Email);
                 var claimNameIdentifier = new Claim(ClaimTypes.NameIdentifier, Convert.ToString(user.Id));
                 var claimFirstName = new Claim("FirstName", user.FirstName);
                 var claimLastName = new Claim("LastName", user.LastName);
