@@ -32,7 +32,7 @@ namespace Blogger.Persistence.Extensions
                 .AddTransient(typeof(IGenericRepository<>), typeof(GenericRepository<>))
                 //.AddTransient<IJwtManagerRepository, JwtManagerRepository>()
                 .AddTransient<IUserRepository, UserRepository>()
-              
+                .AddTransient<IPostRepository, PostRepository>()
             //.AddTransient<IStadiumRepository, StadiumRepository>()
 
             ;

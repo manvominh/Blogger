@@ -9,17 +9,17 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Infrastructure", "Infrastru
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Presentation", "Presentation", "{A95D41B5-9FE8-440F-9C8F-A68C25DBCD91}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blogger.Domain", "Blogger.Domain\Blogger.Domain.csproj", "{5C136DF6-DE78-4F50-8744-994801C2BA65}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Blogger.Domain", "Blogger.Domain\Blogger.Domain.csproj", "{5C136DF6-DE78-4F50-8744-994801C2BA65}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blogger.Application", "Blogger.Application\Blogger.Application.csproj", "{810A19DF-F1C9-48DF-AF9C-40BA5C82256F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Blogger.Application", "Blogger.Application\Blogger.Application.csproj", "{810A19DF-F1C9-48DF-AF9C-40BA5C82256F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blogger.Persistence", "Blogger.Persistence\Blogger.Persistence.csproj", "{7C98BED8-92E1-4119-A1BF-395DEEE72B7A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Blogger.Persistence", "Blogger.Persistence\Blogger.Persistence.csproj", "{7C98BED8-92E1-4119-A1BF-395DEEE72B7A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blogger.API", "Blogger.API\Blogger.API.csproj", "{77DF871A-2535-4A1B-A143-F985122407A4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Blogger.API", "Blogger.API\Blogger.API.csproj", "{77DF871A-2535-4A1B-A143-F985122407A4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blogger.Infrastructure", "Blogger.Infrastructure\Blogger.Infrastructure.csproj", "{616C4B60-B6C0-4955-9D3B-28B54AE0598A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Blogger.Infrastructure", "Blogger.Infrastructure\Blogger.Infrastructure.csproj", "{616C4B60-B6C0-4955-9D3B-28B54AE0598A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blogger.WebUI", "Blogger.WebUI\Blogger.WebUI.csproj", "{777E51FF-1C96-46FD-8887-EBC7BE0ED488}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Blogger.WebUI", "Blogger.WebUI\Blogger.WebUI.csproj", "{777E51FF-1C96-46FD-8887-EBC7BE0ED488}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

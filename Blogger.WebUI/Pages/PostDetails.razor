@@ -1,4 +1,4 @@
-﻿@page "/postdetails"
+﻿@page "/postdetails/{postId:int}"
 <h3>PostDetails</h3>
 <section class="section">
     <div class="container">
@@ -255,5 +255,6 @@
     </div>
 </section>
 @code {
-
+    [Parameter]
+    public int postId { get; set; }
 }

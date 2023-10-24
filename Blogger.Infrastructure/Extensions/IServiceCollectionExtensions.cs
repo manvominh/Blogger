@@ -16,6 +16,7 @@ namespace Blogger.Infrastructure.Extensions
             services
                 .AddTransient<IJwtAuthenticationManagerService, JwtAuthenticationManagerService>()
                 .AddTransient<IUserService, UserService>()
+                .AddTransient<IPostService, PostService>()
                 ;
         }
     }
