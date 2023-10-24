@@ -32,5 +32,6 @@ namespace Blogger.Application.Dtos
         public string Gender { get; set; }
         public DateTime? DateOfBirth { get; set; } = DateTime.Now;
         public string? Address { get; set; }
+        public bool IsDeleted { get; set; }
     }
 }

@@ -30,24 +30,24 @@
 							</AuthorizeView>
 							<AuthorizeView Roles="Administrator,User">
 								<Authorized>
-							<li class="has-children">
-								<a href="/myposts/@UserId">Posts</a>
-								<ul class="dropdown">
-									<li><a href="/myposts">My Post</a></li>
-									<li><a href="/postdetails">New Post</a></li>
-								</ul>
-							</li>
+									<li class="has-children">
+										<a href="/myposts/@UserId">Posts</a>
+										<ul class="dropdown">
+											<li><a href="/myposts/@UserId">My Post</a></li>
+											<li><a href="/postdetails">New Post</a></li>
+										</ul>
+									</li>
 								</Authorized>
 							</AuthorizeView>
 							<AuthorizeView Roles="Administrator">
 								<Authorized>
-							<li class="has-children">
-								<a href="/users">Admin</a>
-								<ul class="dropdown">
-									<li><a href="/users">Users</a></li>
-									<li><a href="/roles">Roles</a></li>
-								</ul>
-							</li>
+									<li class="has-children">
+										<a href="/users">Admin</a>
+										<ul class="dropdown">
+											<li><a href="/users">Users</a></li>
+											<li><a href="/roles">Roles</a></li>
+										</ul>
+									</li>
 								 </Authorized>
 							</AuthorizeView>
 							<AuthorizeView>
@@ -105,7 +105,7 @@
 	private async Task Logout()
 	{
 		await _localStorageService.RemoveItemAsync("jwt_token");
-		_navigationManager.NavigateTo("/");
+		_navigationManager.NavigateTo("/", true);
 	}
 	private string DisplayFullName(List<Claim> claims)
 	{
