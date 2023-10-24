@@ -2,7 +2,6 @@
 
 @using Blogger.Application.Dtos
 @inject IHttpClientFactory _httpClientFactory
-@* @inject HttpClient httpClient *@
 @inject NavigationManager _navigationManager
 @inject IToastService _toastService
 <h3>Register</h3>
@@ -66,7 +65,7 @@
 						</div>
 
 						<div class="col-12">
-							<input type="submit" value="Send Message" class="btn btn-primary">
+							<input type="submit" value="Register" class="btn btn-primary">
 						</div>
 					</div>
 					</EditForm>
@@ -79,10 +78,24 @@
 	UserRegistrationDto register = new UserRegistrationDto();
 	private EditContext editContext;
 	private string APIErrorMessages;
-
-	protected override void OnInitialized()
+	[CascadingParameter]
+	private Task<AuthenticationState> authenticationState { get; set; }
+	protected override async void OnInitialized()
 	{
 		editContext = new EditContext(register);
+		var authState = await authenticationState;
+		var user = authState.User;
+
+		if (user.Identity.IsAuthenticated)
+		{
+			_navigationManager.NavigateTo("/profile");
+		}
+		
+	}
+	async Task OnKeyPress(KeyboardEventArgs args)
+	{
+		if (args.Key == "Enter")
+			await RegisterUser();
 	}
 	private async Task RegisterUser()
 	{

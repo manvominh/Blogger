@@ -75,8 +75,26 @@ namespace Blogger.Infrastructure.Services
             return (true, "Success");
         }
 
-        #region Utilities of User
-        private User FromUserRegistrationModelToUserModel(UserRegistrationDto userRegistration)
+		public async Task<(bool IsUserUpdated, string Message)> UpdateUserByEmail(UserRegistrationDto userRegistration)
+		{
+			var existedUser = await _userRepository.GetByEmail(userRegistration.Email);
+			if (existedUser == null)
+			{
+				return (false, "Email does not exist. Update Profile Error.");
+			}
+            existedUser.Password = userRegistration.Password;
+            existedUser.FirstName = userRegistration.FirstName;
+            existedUser.LastName = userRegistration.LastName;
+            existedUser.Gender = userRegistration.Gender;
+            existedUser.DateOfBirth = userRegistration.DateOfBirth;
+            existedUser.Address = userRegistration.Address;
+            await _unitOfWork.Repository<User>().UpdateAsync(existedUser);
+			await _unitOfWork.Save();
+			return (true, "Success");
+		}
+
+		#region Utilities of User
+		private User FromUserRegistrationModelToUserModel(UserRegistrationDto userRegistration)
         {
             return new User
             {

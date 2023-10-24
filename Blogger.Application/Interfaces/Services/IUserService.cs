@@ -7,8 +7,9 @@ namespace Blogger.Application.Interfaces.Services
     {
         Task<IEnumerable<User>> GetAll();
         Task<User> GetByEmail(string email);
+		Task<(bool IsUserUpdated, string Message)> UpdateUserByEmail(UserRegistrationDto userRegistration);
 
-        Task<(bool IsUserRegistered, string Message)> Register(UserRegistrationDto userRegistration);
+		Task<(bool IsUserRegistered, string Message)> Register(UserRegistrationDto userRegistration);
 
         bool CheckUserUniqueEmail(string email);
 

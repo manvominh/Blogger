@@ -7,6 +7,6 @@ namespace Blogger.Application.Interfaces.Services
     public interface IJwtAuthenticationManagerService
     {
         Task<UserSession?> GenerateJwtToken(User user);
-        ClaimsPrincipal GetPrincipalFromExpiredToken(string token);
+        ClaimsPrincipal GetPrincipalFromToken(string token);
     }
 }

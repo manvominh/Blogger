@@ -13,14 +13,8 @@ namespace Blogger.Infrastructure.Services
     public class JwtAuthenticationManagerService : IJwtAuthenticationManagerService
     {
         public const string JWT_SECURITY_KEY = "yPkCqn4kSWLtaJwXvN2jGzpQRyTZ3gdXkt7FeBJP";
-        private const int JWT_TOKEN_VALIDITY_MINS = 20;
+        public const int JWT_TOKEN_VALIDITY_MINS = 20;
 
-        private IUnitOfWork _unitOfWork;
-
-        public JwtAuthenticationManagerService(IUnitOfWork unitOfWork)
-        {
-            _unitOfWork = unitOfWork;
-        }
         public Task<UserSession?> GenerateJwtToken(User user)
         {
             ///* Validating the User Credentials */
@@ -30,13 +24,14 @@ namespace Blogger.Infrastructure.Services
             /* Generating JWT Token */
             var tokenExpiryTimeStamp = DateTime.Now.AddMinutes(JWT_TOKEN_VALIDITY_MINS);
             var tokenKey = Encoding.ASCII.GetBytes(JWT_SECURITY_KEY);
+			var expiryTimeStamp = new Claim(ClaimTypes.Expiration, DateTime.Now.AddMinutes(JWT_TOKEN_VALIDITY_MINS).ToString());
 
 			var claimEmailAddress = new Claim(ClaimTypes.Email, user.Email);
 			var claimNameIdentifier = new Claim(ClaimTypes.NameIdentifier, Convert.ToString(user.Id));
 			var claimFirstName = new Claim("FirstName", user.FirstName);
 			var claimLastName = new Claim("LastName", user.LastName);
 
-			var claimsIdentity = new ClaimsIdentity(new[] { claimEmailAddress, claimNameIdentifier, claimFirstName, claimLastName }, "jwtAuth");
+			var claimsIdentity = new ClaimsIdentity(new[] { claimEmailAddress, claimNameIdentifier, claimFirstName, claimLastName, expiryTimeStamp }, "jwtAuth");
             foreach (var role in user.UserRoles)
             {
                 var claim = new Claim(ClaimTypes.Role, role.Role.Name);
@@ -66,11 +61,10 @@ namespace Blogger.Infrastructure.Services
             };
             return Task.FromResult<UserSession?>(userSession);
         }
-        public ClaimsPrincipal GetPrincipalFromExpiredToken(string token)
+        public ClaimsPrincipal GetPrincipalFromToken(string token)
         {
             try
             {
-                //string abc = token.Replace("'", "");
                 var key = Encoding.UTF8.GetBytes(JWT_SECURITY_KEY);
                 var tokenValidationParameters = new TokenValidationParameters
                 {
@@ -80,8 +74,13 @@ namespace Blogger.Infrastructure.Services
                     ValidateAudience = false
                 };
                 var tokenHandler = new JwtSecurityTokenHandler();
-                SecurityToken securityToken;
-
+				var jwt = tokenHandler.ReadJwtToken(token);
+				var expiredTime = jwt.Claims.First(c => c.Type == ClaimTypes.Expiration).Value;
+                if(DateTime.Parse(expiredTime) < DateTime.Now)
+                {
+                    return null;
+                }
+				SecurityToken securityToken;
                 //validating the token
                 var principle = tokenHandler.ValidateToken(token, tokenValidationParameters, out securityToken);
                 JwtSecurityToken jwtSecurityToken = securityToken as JwtSecurityToken;
@@ -98,6 +97,27 @@ namespace Blogger.Infrastructure.Services
                 Console.WriteLine("Exception : " + ex.Message);
                 return null;
             }
-        }
-    }
+			
+		}
+		public static long GetTokenExpirationTime(string token)
+		{
+			var handler = new JwtSecurityTokenHandler();
+			var jwtSecurityToken = handler.ReadJwtToken(token);
+			var tokenExp = jwtSecurityToken.Claims.First(claim => claim.Type.Equals("exp")).Value;
+			var ticks = long.Parse(tokenExp);
+			return ticks;
+		}
+
+		public static bool CheckTokenIsValid(string token)
+		{
+			var tokenTicks = GetTokenExpirationTime(token);
+			var tokenDate = DateTimeOffset.FromUnixTimeSeconds(tokenTicks).UtcDateTime;
+
+			var now = DateTime.Now.ToUniversalTime();
+
+			var valid = tokenDate >= now;
+
+			return valid;
+		}
+	}
 }

@@ -48,7 +48,7 @@ namespace Blogger.API.Controllers
             {
                 return Ok(result.UserSession);
             }
-            ModelState.AddModelError("LoginError", "Invalid Credentials");
+            ModelState.AddModelError("LoginError", "Invalid username or password");
             return BadRequest(ModelState);
         }
         [AllowAnonymous]
@@ -64,5 +64,18 @@ namespace Blogger.API.Controllers
             ModelState.AddModelError("GetUserDetailsError", "Invalid Email information");
             return BadRequest(ModelState);
         }
-    }
+		[Authorize]
+		[HttpPost]
+		[Route("UpdateUserByEmail")]
+		public async Task<IActionResult> UpdateUserByEmail([FromBody] UserRegistrationDto userRegistration)
+		{
+			var result = await _userService.UpdateUserByEmail(userRegistration);
+			if (result.IsUserUpdated)
+			{
+				return Ok(result);
+			}
+			ModelState.AddModelError("UpdateProfileError", "Update Profile Error.");
+			return BadRequest(ModelState);
+		}
+	}
 }

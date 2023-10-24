@@ -27,7 +27,7 @@ namespace Blogger.WebUI
 
         public async override Task<AuthenticationState> GetAuthenticationStateAsync()
         {
-            User user = await GetUserByJWTAsync();
+            User? user = await GetUserByJWTAsync();
 
             if (user != null && user.Email != null)
             {
@@ -36,8 +36,9 @@ namespace Blogger.WebUI
                 var claimNameIdentifier = new Claim(ClaimTypes.NameIdentifier, Convert.ToString(user.Id));
                 var claimFirstName = new Claim("FirstName", user.FirstName);
                 var claimLastName = new Claim("LastName", user.LastName);
-                //create claimsIdentity
-                var claimsIdentity = new ClaimsIdentity(new[] { claimEmailAddress, claimNameIdentifier, claimFirstName, claimLastName }, "jwtAuth");
+                var expiryTimeStamp = new Claim(ClaimTypes.Expiration, DateTime.Now.AddMinutes(20).ToString());
+				//create claimsIdentity
+				var claimsIdentity = new ClaimsIdentity(new[] { claimEmailAddress, claimNameIdentifier, claimFirstName, claimLastName, expiryTimeStamp }, "jwtAuth");
 				foreach (var role in user.UserRoles)
 				{
 					var claim = new Claim(ClaimTypes.Role, role.Role.Name);
@@ -45,19 +46,20 @@ namespace Blogger.WebUI
 				}
 				//create claimsPrincipal
 				var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
-                return await Task.FromResult(new AuthenticationState(claimsPrincipal));// new AuthenticationState(claimsPrincipal);
+                return await Task.FromResult(new AuthenticationState(claimsPrincipal));
             }
             else
                 return await Task.FromResult(new AuthenticationState(_anonymous));
         }
 
-        public async Task<User> GetUserByJWTAsync()
+        public async Task<User?> GetUserByJWTAsync()
         {
             //pulling the token from localStorage
             var jwtToken = await _localStorageService.GetItemAsync<string>("jwt_token");
             if (jwtToken == null) return null;
 
-            var principle = _jwtAuthenticationManagerService.GetPrincipalFromExpiredToken(jwtToken);
+            var principle = _jwtAuthenticationManagerService.GetPrincipalFromToken(jwtToken);
+            if(principle == null) return null;
             var email = principle.FindFirst(ClaimTypes.Email)?.Value;
             
             var httpClient = _httpClientFactory.CreateClient("blog");

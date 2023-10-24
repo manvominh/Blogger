@@ -21,7 +21,7 @@ namespace Blogger.Application.Dtos
         [Compare("Password", ErrorMessage = "Confirm password doesn't match, Type again !")]
         [Display(Name = "Confirm Password")]
         public string ConfirmPassword { get; set; }
-        [Required(ErrorMessage = "Please enter Firs Name.")]
+        [Required(ErrorMessage = "Please enter First Name.")]
         [Display(Name = "First Name")]
         public string FirstName { get; set; }
         [Required(ErrorMessage = "Please enter Last Name.")]

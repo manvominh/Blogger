@@ -18,18 +18,17 @@
 					<div class="col-2">
 						<a href="/" class="logo m-0 float-start">Man Vo<span class="text-primary">.</span></a>
 					</div>
-					<div class="col-7 text-center">
+					<div class="col-8 text-center">
 						<ul class="js-clone-nav d-none d-lg-inline-block text-start site-menu mx-auto">
 							<li class="active"><a href="/">Home</a></li>							
 							<AuthorizeView>
-								<Authorized>
-									@* <li><a @onclick="Logout" href="javascript:void(0)">Logout</a></li> *@
-								</Authorized>
 								<NotAuthorized>
 									<li><a href="/register">Register</a></li>
 									<li><a href="/login">Login</a></li>
 								</NotAuthorized>
 							</AuthorizeView>
+							<AuthorizeView Roles="Administrator,User">
+								<Authorized>
 							<li class="has-children">
 								<a href="/myposts">Posts</a>
 								<ul class="dropdown">
@@ -37,6 +36,10 @@
 									<li><a href="/postdetails">New Post</a></li>
 								</ul>
 							</li>
+								</Authorized>
+							</AuthorizeView>
+							<AuthorizeView Roles="Administrator">
+								<Authorized>
 							<li class="has-children">
 								<a href="/users">Admin</a>
 								<ul class="dropdown">
@@ -44,16 +47,21 @@
 									<li><a href="/roles">Roles</a></li>
 								</ul>
 							</li>
+								 </Authorized>
+							</AuthorizeView>
+							<AuthorizeView>
+								<Authorized>
+									<li class="has-children">
+										<a href="/profile"><i class="fas fa-user"></i></a>
+										<ul class="dropdown">
+											<li><a href="/profile">Profile</a></li>
+											<li><a @onclick="Logout" href="javascript:void(0)">Logout</a></li>
+										</ul>
+									</li>
+								</Authorized>
+							</AuthorizeView>
 						</ul>
 					</div>
-					<AuthorizeView Roles="Administrator,User">
-						<Authorized>
-							<div class="col-1 text-center">
-								<a href="/profile" style="color:white"><i class="fas fa-user"></i></a>
-								&nbsp;&nbsp;&nbsp;<a style="color:white" @onclick="Logout" href="javascript:void(0)">Logout</a>
-							</div>
-						</Authorized>
-					</AuthorizeView>
 					<div class="col-2 text-end">
 						<a href="#" class="burger ms-auto float-end site-menu-toggle js-menu-toggle d-inline-block d-lg-none light">
 							<span></span>
@@ -82,6 +90,6 @@
 	private async Task Logout()
 	{
 		await _localStorageService.RemoveItemAsync("jwt_token");
-		_navigationManager.NavigateTo("/", true);
+		_navigationManager.NavigateTo("/");
 	}
 }

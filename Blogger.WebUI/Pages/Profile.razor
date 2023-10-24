@@ -1,74 +1,190 @@
 ﻿@page "/profile"
-<section>
+@using Blogger.Application.Dtos;
+@using Blogger.Domain.Entities;
+@using System.Security.Claims;
+@inject IHttpClientFactory _httpClientFactory
+@inject NavigationManager _navigationManager
+@inject IToastService _toastService
+
+<div>
     <div class="container py-5">
         <div class="row">
             <div class="col">
                 <nav aria-label="breadcrumb" class="bg-light rounded-3 p-3 mb-4">
                     <ol class="breadcrumb mb-0">
-                        <li class="breadcrumb-item"><a href="#">Home</a></li>
-                        <li class="breadcrumb-item"><a href="#">User</a></li>
                         <li class="breadcrumb-item active" aria-current="page">User Profile</li>
                     </ol>
                 </nav>
             </div>
         </div>
+		@if (register == null)
+		{
+			<p><em>Loading...</em></p>
+		}
+		else
+		{
+			<EditForm EditContext="@editContext" OnValidSubmit="UpdateUser" @onreset="HandleReset">
 
-        <div class="row">
-            <div class="col-lg-8">
-                <div class="card mb-4">
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-sm-3">
-                                <p class="mb-0">Full Name</p>
-                            </div>
-                            <div class="col-sm-9">
-                                <input type="password" id="form3Example4cd" />
-                            </div>
-                        </div>
-                        <hr>
-                        <div class="row">
-                            <div class="col-sm-3">
-                                <p class="mb-0">Email</p>
-                            </div>
-                            <div class="col-sm-9">
-                                <p class="text-muted mb-0">example@example.com</p>
-                            </div>
-                        </div>
-                        <hr>
-                        <div class="row">
-                            <div class="col-sm-3">
-                                <p class="mb-0">Phone</p>
-                            </div>
-                            <div class="col-sm-9">
-                                <p class="text-muted mb-0">(097) 234-5678</p>
-                            </div>
-                        </div>
-                        <hr>
-                        <div class="row">
-                            <div class="col-sm-3">
-                                <p class="mb-0">Mobile</p>
-                            </div>
-                            <div class="col-sm-9">
-                                <p class="text-muted mb-0">(098) 765-4321</p>
-                            </div>
-                        </div>
-                        <hr>
-                        <div class="row">
-                            <div class="col-sm-3">
-                                <p class="mb-0">Address</p>
-                            </div>
-                            <div class="col-sm-9">
-                                <p class="text-muted mb-0">Bay Area, San Francisco, CA</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-            </div>
-        </div>
+				<DataAnnotationsValidator />
+				@if (!string.IsNullOrEmpty(APIErrorMessages))
+				{
+					<p class="text-danger">@APIErrorMessages</p>
+				}
+
+				<div class="row">
+					<div class="col-12 mb-3">
+						<label class="form-label">Email address</label>
+						<InputText @bind-Value="register.Email" class="form-control" placeholder="Your Email" readonly="true" />
+						<ValidationMessage For="@(() => register.Email)" />
+					</div>
+					<div class="col-6 mb-3">
+						<label class="form-label">Password</label>
+						<InputText @bind-Value="register.Password" class="form-control" type="password" placeholder="Password" />
+						<ValidationMessage For="@(() => register.Password)" />
+					</div>
+					<div class="col-6 mb-3">
+						<label class="form-label">Confirm Password</label>
+						<InputText @bind-Value="register.ConfirmPassword" class="form-control" type="password" placeholder="Confirm Password" />
+						<ValidationMessage For="@(() => register.ConfirmPassword)" />
+					</div>
+					<div class="col-6 mb-3">
+						<label class="form-label">First Name</label>
+						<InputText @bind-Value="register.FirstName" class="form-control" placeholder="First Name" />
+						<ValidationMessage For="@(() => register.FirstName)" />
+					</div>
+					<div class="col-6 mb-3">
+						<label class="form-label">Last Name</label>
+						<InputText @bind-Value="register.LastName" class="form-control" placeholder="Last Name" />
+						<ValidationMessage For="@(() => register.LastName)" />
+					</div>
+					<div class="col-6 mb-3">
+						<label class="form-label">Gender</label>
+						<InputSelect @bind-Value="register.Gender" class="form-control" placeholder="Gender">
+							<option value=""></option>
+							<option value="Mr">Mr</option>
+							<option value="Mrs">Mrs</option>
+							<option value="Miss">Miss</option>
+							<option value="Ms">Ms</option>
+						</InputSelect>
+						<ValidationMessage For="@(() => register.Gender)" />
+					</div>
+					<div class="col-6 mb-3">
+						<label class="form-label">Date Of Birth</label>
+						<InputDate @bind-Value="register.DateOfBirth" class="form-control" placeholder="Date of Birth" />
+						<ValidationMessage For="@(() => register.DateOfBirth)" />
+					</div>
+					<div class="col-12 mb-3">
+						<InputTextArea @bind-Value="register.Address" class="form-control" placeholder="Address" />
+						<ValidationMessage For="@(() => register.Address)" />
+					</div>
+
+					<div class="col-12">
+						<input type="submit" value="Update" class="btn btn-primary">
+					</div>
+				</div>
+			</EditForm>
+		}
     </div>
-</section>
+</div>
 
 @code {
+	UserRegistrationDto register;
+	private EditContext editContext;
+	private string APIErrorMessages;
+	[CascadingParameter]
+	private Task<AuthenticationState> authenticationState { get; set; }
+	protected async override Task OnInitializedAsync()
+	{		
+		var authState = await authenticationState;
+		var user = authState.User;
 
+		if (user.Identity.IsAuthenticated)
+		{
+			var email = user.FindFirst(ClaimTypes.Email)?.Value;
+			var httpClient = _httpClientFactory.CreateClient("blog");
+			var response = await httpClient.PostAsJsonAsync<string>("/api/Users/GetUserDetailsByEmail", email);
+			if (response.StatusCode == HttpStatusCode.BadRequest)
+			{
+				var errors = await response.Content.ReadFromJsonAsync<Dictionary<string, List<string>>>();
+				if (errors.Count > 0)
+				{
+					foreach (var item in errors)
+					{
+						foreach (var errorMessage in item.Value)
+						{
+							APIErrorMessages = !string.IsNullOrEmpty(APIErrorMessages) ? $"{APIErrorMessages} | {errorMessage}" : $"{errorMessage}";
+						}
+					}
+				}
+				_toastService.ShowError(APIErrorMessages);
+			}
+			else if (response.IsSuccessStatusCode)
+			{
+				var userInfo = await response.Content.ReadFromJsonAsync<User>();
+				if(userInfo != null)
+				{
+					register.Email = userInfo.Email;
+					register.Password = userInfo.Password;
+					register.ConfirmPassword = userInfo.Password;
+					register.FirstName = userInfo.FirstName;
+					register.LastName = userInfo.LastName;
+					register.Gender = userInfo.Gender;
+					register.DateOfBirth = userInfo.DateOfBirth;
+					register.Address = userInfo.Address;
+				}
+				else
+					_toastService.ShowSuccess("Get profile failed.");
+				
+			}
+			else
+			{
+				_toastService.ShowError("Error on calling API");
+			}
+		}
+		else
+		{
+			_navigationManager.NavigateTo("/login");
+		}
+		editContext = new EditContext(register);
+	}
+	async Task OnKeyPress(KeyboardEventArgs args)
+	{
+		if (args.Key == "Enter")
+			await UpdateUser();
+	}
+
+	private async Task UpdateUser()
+	{
+		var httpClient = _httpClientFactory.CreateClient("blog");
+		var response = await httpClient.PostAsJsonAsync<UserRegistrationDto>("/api/Users/UpdateUserByEmail", register);
+
+		if (response.StatusCode == HttpStatusCode.BadRequest)
+		{
+			var errors = await response.Content.ReadFromJsonAsync<Dictionary<string, List<string>>>();
+			if (errors.Count > 0)
+			{
+				foreach (var item in errors)
+				{
+					foreach (var errorMessage in item.Value)
+					{
+						APIErrorMessages = !string.IsNullOrEmpty(APIErrorMessages) ? $"{APIErrorMessages} | {errorMessage}" : $"{errorMessage}";
+					}
+				}
+			}
+			_toastService.ShowError(APIErrorMessages);
+		}
+		else if (response.IsSuccessStatusCode)
+		{
+			_toastService.ShowSuccess("Update Profile successfully");
+		}
+		else
+		{
+			_toastService.ShowError("Error on calling API");
+		}
+	}
+	private void HandleReset()
+	{
+		register = new UserRegistrationDto();
+		editContext = new EditContext(register);
+	}
 }

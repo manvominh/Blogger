@@ -1,6 +1,5 @@
 ﻿@page "/login"
 
-
 @using Blogger.Application.Dtos
 
 @inject NavigationManager _navigationManager
@@ -10,66 +9,47 @@
 @inject AuthenticationStateProvider authStateProvider
 @inject IHttpClientFactory _httpClientFactory;
 @inject IToastService _toastService
-
-<section class="vh-100">
-    <div class="container-fluid h-custom">
-        <div class="row d-flex justify-content-center align-items-center h-100">
-            <div class="col-md-8 col-lg-6 col-xl-4 offset-xl-1">
+<h3>Login</h3>
+<div class="section">
+	<div class="container">
+		<div class="row">
+			<div class="col-lg-8" >
                 <EditForm EditContext="@editContext" OnValidSubmit="Authenticate">
-					<DataAnnotationsValidator />
-					@if (!string.IsNullOrEmpty(APIErrorMessages))
-					{
-					<p class="text-danger">@APIErrorMessages</p>
-					}
-                    <div class="d-flex flex-row align-items-center justify-content-center justify-content-lg-start">
-                       @*  <p class="lead fw-normal mb-0 me-3">Sign in</p> *@
-                        <h3>Sign in</h3>
-                    </div>
 
-                    <!-- Email input -->
-                    <div class="form-outline mb-4">
-                        <label class="form-label" for="form3Example3">Email address</label>
-                        <input type="email" id="form3Example3" @bind="loginDto.Email" class="form-control form-control-lg"
-                               placeholder="Enter a valid email address" />
-                        <ValidationMessage For="@(() => loginDto.Email)" />
-                    </div>
+                    <DataAnnotationsValidator />
 
-                    <!-- Password input -->
-                    <div class="form-outline mb-3">
-                        <label class="form-label" for="form3Example4">Password</label>
-                        <input type="password" id="form3Example4" @bind="loginDto.Password" class="form-control form-control-lg"
-                               placeholder="Enter password" />
-                        <ValidationMessage For="@(() => loginDto.Password)" />
-                    </div>
+                    @if (!string.IsNullOrEmpty(APIErrorMessages))
+                    {
+                        <p class="text-danger">@APIErrorMessages</p>
+                    }
 
-                    @* <div class="d-flex justify-content-between align-items-center">
-                        <!-- Checkbox -->
-                        <div class="form-check mb-0">
-                            <input class="form-check-input me-2" type="checkbox" value="" id="form2Example3" />
-                            <label class="form-check-label" for="form2Example3">
-                                Remember me
-                            </label>
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <label class="form-label">Email address</label>
+                            <InputText @bind-Value="loginDto.Email" class="form-control" placeholder="Your Email" />
+                            <ValidationMessage For="@(() => loginDto.Email)" />
                         </div>
-                        <a href="#!" class="text-body">Forgot password?</a>
-                    </div> *@
-
-                    <div class="text-center text-lg-start mt-4 pt-2">
-                        <button type="button" class="btn btn-primary btn-lg"
-                                style="padding-left: 2.5rem; padding-right: 2.5rem;" @onclick="Authenticate">
-                            Login
-                        </button>
-                        <p class="small fw-bold mt-2 pt-1 mb-0">
-                            Don't have an account? <a href="/register"
-                                                      class="link-danger">Register</a>
-                        </p>
                     </div>
-
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <label class="form-label">Password</label>
+                            <InputText @bind-Value="loginDto.Password" class="form-control" type="password" placeholder="Password" />
+                            <ValidationMessage For="@(() => loginDto.Password)" />
+                        </div>
+                        <div class="col-12">
+                            <input type="submit" value="Login" class="btn btn-primary">
+                            <p class="small fw-bold mt-2 pt-1 mb-0">
+                                Don't have an account? <a href="/register"
+                                                          class="link-danger">Register</a>
+                            </p>
+                        </div>
+                    </div>
                 </EditForm>
             </div>
         </div>
     </div>
     
-</section>
+</div>
 
 @code {
     LoginDto loginDto = new LoginDto();
@@ -88,6 +68,12 @@
         {
             _navigationManager.NavigateTo("/profile");
         }
+    }
+
+    async Task OnKeyPress(KeyboardEventArgs args)
+    {
+        if (args.Key == "Enter")
+            await Authenticate();
     }
 
     private async Task Authenticate()
