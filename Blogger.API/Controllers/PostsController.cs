@@ -37,5 +37,18 @@ namespace Blogger.API.Controllers
 			ModelState.AddModelError("PostDetailsError", "Get Post Details error.");
 			return BadRequest(ModelState);
 		}
+		[Authorize]
+		[HttpPost]
+		[Route("GetPostsByUserId")]
+		public async Task<IActionResult> GetPostsByUserId([FromBody] int userId)
+		{
+			var result = await _postService.GetPostsByUserId(userId);
+			if (result != null)
+			{
+				return Ok(result);
+			}
+			ModelState.AddModelError("GetPostsByUserIdError", "Get Posts By User error.");
+			return BadRequest(ModelState);
+		}
 	}
 }

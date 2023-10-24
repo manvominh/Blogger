@@ -20,24 +20,8 @@ else
 			<div class="container">
 				<div class="row posts-entry">
 					<div class="col-lg-12">
-						@foreach(var item in Posts)
-						{
-							<div class="blog-entry d-flex blog-entry-search-item">
-								<a href="/postdetails/@item.Id" class="img-link me-4">
-									<img src="images/@item.Image" alt="Image" class="img-fluid">
-								</a>
-								<div>
-									<span class="date">@item.PublishedDate</span>
-									<h2><a href="/postdetails/@item.Id">@item.Title</a></h2>
-									<p>@item.Introduction</p>
-									<p><a href="/postdetails/@item.Id" class="btn btn-sm btn-outline-primary">Read More</a></p>
-								</div>
-							</div>
-						}
+						<PostSummary Posts="Posts"></PostSummary>
 						
-
-
-
 						@* 					<div class="row text-start pt-5 border-top">
 				<div class="col-md-12">
 				<div class="custom-pagination">

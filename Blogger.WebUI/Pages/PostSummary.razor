@@ -1,15 +1,19 @@
-﻿<div class="blog-entry d-flex blog-entry-search-item">
-	<a href="single.html" class="img-link me-4">
-		<img src="images/img_1_sq.jpg" alt="Image" class="img-fluid">
-	</a>
-	<div>
-		<span class="date">Apr. 14th, 2022 &bullet; <a href="#">Business</a></span>
-		<h2><a href="single.html">Thought you loved Python? Wait until you meet Rust</a></h2>
-		<p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Unde, nobis ea quis inventore vel voluptas.</p>
-		<p><a href="single.html" class="btn btn-sm btn-outline-primary">Read More</a></p>
+﻿@using Blogger.Domain.Entities;
+@foreach (var item in Posts)
+{
+	<div class="blog-entry d-flex blog-entry-search-item">
+		<a href="/postdetails/@item.Id" class="img-link me-4">
+			<img src="images/@item.Image" alt="Image" class="img-fluid">
+		</a>
+		<div>
+			<span class="date">@item.PublishedDate</span>
+			<h2><a href="/postdetails/@item.Id">@item.Title</a></h2>
+			<p>@item.Introduction</p>
+			<p><a href="/postdetails/@item.Id" class="btn btn-sm btn-outline-primary">Read More</a></p>
+		</div>
 	</div>
-</div>
-
+}
 @code {
-
+	[Parameter]
+	public IEnumerable<Post> Posts { get; set; }
 }

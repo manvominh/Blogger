@@ -1,6 +1,87 @@
-﻿@page "/myposts"
-<h3>MyPosts</h3>
+﻿@page "/myposts/{userId:int}"
+@using Blogger.Domain.Entities;
+@using Blogger.Application.Interfaces.Services;
+@using System.Security.Claims;
+@using Microsoft.AspNetCore.Authorization;
 
+@attribute [Authorize(Roles = "Administrator, User")]
+@inject IHttpClientFactory _httpClientFactory
+@inject NavigationManager _navigationManager
+@inject IToastService _toastService
+@if (Posts == null)
+{
+	<p><em>Loading...</em></p>
+}
+else
+{
+	@if (!string.IsNullOrEmpty(APIErrorMessages))
+	{
+		<p class="text-danger">@APIErrorMessages</p>
+	}
+	var postCount = Posts.Count();
+	@if (postCount > 0)
+	{
+		<div class="section search-result-wrap">
+			<div class="container">
+				<div class="row posts-entry">
+					<div class="col-lg-12">
+						<PostSummary Posts="Posts"></PostSummary>
+					</div>
+				</div>
+			</div>
+		</div>
+	}
+	else
+	{
+		<p><em>There is no posts.</em></p>
+	}
+}
 @code {
+	[Parameter]
+	public int userId { get; set; }
+	public IEnumerable<Post> Posts { get; set; }
+	[Inject]
+	public IPostService PostService { get; set; }
+	private string APIErrorMessages;
+	[CascadingParameter]
+	private Task<AuthenticationState> authenticationState { get; set; }
+	protected override async Task OnInitializedAsync()
+	{
+		var authState = await authenticationState;
+		var user = authState.User;
 
+		if (user.Identity.IsAuthenticated)
+		{
+			var userIdIdentifier = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+			var httpClient = _httpClientFactory.CreateClient("blog");
+			var response = await httpClient.PostAsJsonAsync($"api/Posts/GetPostsByUserId", userIdIdentifier);
+
+			if (response.StatusCode == HttpStatusCode.BadRequest)
+			{
+				var errors = await response.Content.ReadFromJsonAsync<Dictionary<string, List<string>>>();
+				if (errors.Count > 0)
+				{
+					foreach (var item in errors)
+					{
+						foreach (var errorMessage in item.Value)
+						{
+							APIErrorMessages = !string.IsNullOrEmpty(APIErrorMessages) ? $"{APIErrorMessages} | {errorMessage}" : $"{errorMessage}";
+						}
+					}
+				}
+				_toastService.ShowError(APIErrorMessages);
+			}
+			else if (response.IsSuccessStatusCode)
+			{
+				Posts = await response.Content.ReadFromJsonAsync<IEnumerable<Post>>();
+			}
+			else
+			{
+				_toastService.ShowError("Error on calling API");
+			}
+		}
+		else
+			_navigationManager.NavigateTo("/login");
+
+	}
 }

@@ -1,131 +1,93 @@
 ﻿@page "/users"
+
+@using Blogger.Domain.Entities;
+@using Blogger.Application.Interfaces.Services;
+@using Microsoft.AspNetCore.Authorization;
+
+@attribute [Authorize(Roles = "Administrator")]
+@inject IHttpClientFactory _httpClientFactory
+@inject IToastService _toastService
+
 <h3>Users List</h3>
-<!--Table-->
-<table class="table table-striped w-auto">
+@if (users == null)
+{
+	<p><em>Loading...</em></p>
+}
+else
+{
+    var userCount = users.Count();
+    <!--Table-->
+    <table class="table table-striped w-auto">
 
-    <!--Table head-->
-    <thead>
-        <tr>
-            <th>#</th>
-            <th>Name</th>
-            <th>Surname</th>
-            <th>Country</th>
-            <th>City</th>
-            <th>Position</th>
-            <th>Age</th>
-            <th></th>
-            <th></th>
-        </tr>
-    </thead>
-    <!--Table head-->
-    <!--Table body-->
-    <tbody>
-        <tr class="table-info">
-            <th scope="row">1</th>
-            <td>Kate</td>
-            <td>Moss</td>
-            <td>USA</td>
-            <td>New York City</td>
-            <td>Web Designer</td>
-            <td>23</td>
-            <td><i class="fas fa-edit fa-lg me-3 fa-fw" /></td>
-            <td><i class="fas fa-trash fa-lg me-3 fa-fw" /></td>
-        </tr>
-        <tr>
-            <th scope="row">2</th>
-            <td>Anna</td>
-            <td>Wintour</td>
-            <td>United Kingdom</td>
-            <td>London</td>
-            <td>Frontend Developer</td>
-            <td>36</td>
-            <td><i class="fas fa-edit fa-lg me-3 fa-fw" /></td>
-<td><i class="fas fa-trash fa-lg me-3 fa-fw" /></td>
-        </tr>
-        <tr class="table-info">
-            <th scope="row">3</th>
-            <td>Tom</td>
-            <td>Bond</td>
-            <td>Spain</td>
-            <td>Madrid</td>
-            <td>Photographer</td>
-            <td>25</td>
-            <td><i class="fas fa-edit fa-lg me-3 fa-fw" /></td>
-<td><i class="fas fa-trash fa-lg me-3 fa-fw" /></td>
-        </tr>
-        <tr>
-            <th scope="row">4</th>
-            <td>Jerry</td>
-            <td>Horwitz</td>
-            <td>Italy</td>
-            <td>Bari</td>
-            <td>Editor-in-chief</td>
-            <td>41</td>
-            <td><i class="fas fa-edit fa-lg me-3 fa-fw" /></td>
-<td><i class="fas fa-trash fa-lg me-3 fa-fw" /></td>
-        </tr>
-        <tr class="table-info">
-            <th scope="row">5</th>
-            <td>Janis</td>
-            <td>Joplin</td>
-            <td>Poland</td>
-            <td>Warsaw</td>
-            <td>Video Maker</td>
-            <td>39</td>
-            <td><i class="fas fa-edit fa-lg me-3 fa-fw" /></td>
-<td><i class="fas fa-trash fa-lg me-3 fa-fw" /></td>
-        </tr>
-        <tr>
-            <th scope="row">6</th>
-            <td>Gary</td>
-            <td>Winogrand</td>
-            <td>Germany</td>
-            <td>Berlin</td>
-            <td>Photographer</td>
-            <td>37</td>
-            <td><i class="fas fa-edit fa-lg me-3 fa-fw" /></td>
-<td><i class="fas fa-trash fa-lg me-3 fa-fw" /></td>
-        </tr>
-        <tr class="table-info">
-            <th scope="row">7</th>
-            <td>Angie</td>
-            <td>Smith</td>
-            <td>USA</td>
-            <td>San Francisco</td>
-            <td>Teacher</td>
-            <td>52</td>
-            <td><i class="fas fa-edit fa-lg me-3 fa-fw" /></td>
-<td><i class="fas fa-trash fa-lg me-3 fa-fw" /></td>
-        </tr>
-        <tr>
-            <th scope="row">8</th>
-            <td>John</td>
-            <td>Mattis</td>
-            <td>France</td>
-            <td>Paris</td>
-            <td>Actor</td>
-            <td>28</td>
-            <td><i class="fas fa-edit fa-lg me-3 fa-fw" /></td>
-<td><i class="fas fa-trash fa-lg me-3 fa-fw" /></td>
-        </tr>
-        <tr class="table-info">
-            <th scope="row">9</th>
-            <td>Otto</td>
-            <td>Morris</td>
-            <td>Germany</td>
-            <td>Munich</td>
-            <td>Singer</td>
-            <td>35</td>
-            <td><i class="fas fa-edit fa-lg me-3 fa-fw" /></td>
-<td><i class="fas fa-trash fa-lg me-3 fa-fw" /></td>
-        </tr>
-    </tbody>
-    <!--Table body-->
+        <!--Table head-->
+        <thead>
+            <tr>
+                <th>Email</th>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Gender</th>
+                <th>Date of Birth</th>
+                <th>Address</th>
+                <th>Status</th>
+                <th></th>
+                <th></th>
+            </tr>
+        </thead>
+        <!--Table head-->
+        <!--Table body-->
+        <tbody>
+            @foreach (var item in users)
+            {
+                <tr class="table-info">
+                    <td>@item.Email</td>
+                    <td>@item.FirstName</td>
+                    <td>@item.LastName</td>
+                    <td>@item.Gender</td>
+                    <td>@item.DateOfBirth.Value.ToString("dd/MM/yyyy")</td>
+                    <td>@item.Address</td>
+                    <td>@(item.IsDeleted ? "InActive" : "Active")</td>
+                    <td><i class="fas fa-edit fa-lg me-3 fa-fw" /></td>
+                    <td><i class="fas fa-trash fa-lg me-3 fa-fw" /></td>
+                </tr>
+            }
+        </tbody>
+        <!--Table body-->
 
-
-</table>
-<!--Table-->
-
+    </table>
+    <!--Table-->
+}
 @code {
+    public IEnumerable<User> users { get; set; }
+    [Inject]
+    public IUserService UserService { get; set; }
+    private string APIErrorMessages;
+    protected override async Task OnInitializedAsync()
+    {
+        var httpClient = _httpClientFactory.CreateClient("blog");
+        var response = await httpClient.GetAsync($"api/Users/");
 
+        if (response.StatusCode == HttpStatusCode.BadRequest)
+        {
+            var errors = await response.Content.ReadFromJsonAsync<Dictionary<string, List<string>>>();
+            if (errors.Count > 0)
+            {
+                foreach (var item in errors)
+                {
+                    foreach (var errorMessage in item.Value)
+                    {
+                        APIErrorMessages = !string.IsNullOrEmpty(APIErrorMessages) ? $"{APIErrorMessages} | {errorMessage}" : $"{errorMessage}";
+                    }
+                }
+            }
+            _toastService.ShowError(APIErrorMessages);
+        }
+        else if (response.IsSuccessStatusCode)
+        {
+            users = await response.Content.ReadFromJsonAsync<IEnumerable<User>>();
+        }
+        else
+        {
+            _toastService.ShowError("Error on calling API");
+        }
+    }
 }

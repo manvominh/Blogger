@@ -1,4 +1,5 @@
-﻿@inject ILocalStorageService _localStorageService
+﻿@using System.Security.Claims;
+@inject ILocalStorageService _localStorageService
 @inject NavigationManager _navigationManager
 
 <div class="site-mobile-menu site-navbar-target">
@@ -16,7 +17,7 @@
 			<div class="site-navigation">
 				<div class="row g-0 align-items-center">
 					<div class="col-2">
-						<a href="/" class="logo m-0 float-start">Man Vo<span class="text-primary">.</span></a>
+						<a href="/" class="logo m-0 float-start">Man Vo Blog<span class="text-primary">.</span></a>
 					</div>
 					<div class="col-8 text-center">
 						<ul class="js-clone-nav d-none d-lg-inline-block text-start site-menu mx-auto">
@@ -30,7 +31,7 @@
 							<AuthorizeView Roles="Administrator,User">
 								<Authorized>
 							<li class="has-children">
-								<a href="/myposts">Posts</a>
+								<a href="/myposts/@UserId">Posts</a>
 								<ul class="dropdown">
 									<li><a href="/myposts">My Post</a></li>
 									<li><a href="/postdetails">New Post</a></li>
@@ -54,7 +55,8 @@
 									<li class="has-children">
 										<a href="/profile"><i class="fas fa-user"></i></a>
 										<ul class="dropdown">
-											<li><a href="/profile">Profile</a></li>
+											<li><span>Welcome @DisplayFullName(context.User.Claims.ToList())</span></li>
+											<li><a href="/profile" title="">Profile</a></li>
 											<li><a @onclick="Logout" href="javascript:void(0)">Logout</a></li>
 										</ul>
 									</li>
@@ -79,17 +81,41 @@
 </nav>
 <script src="js/navbar.js"></script>
 @code {
-    private bool collapseNavMenu = true;
+	private bool collapseNavMenu = true;
 
-    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+	private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
 
-    private void ToggleNavMenu()
-    {
-        collapseNavMenu = !collapseNavMenu;
-    }
+	private string UserId { get; set; }
+	[CascadingParameter]
+	private Task<AuthenticationState> authenticationState { get; set; }
+
+	private void ToggleNavMenu()
+	{
+		collapseNavMenu = !collapseNavMenu;
+	}
+	protected override async Task OnInitializedAsync()
+	{
+		var authState = await authenticationState;
+		var user = authState.User;
+		if (user.Identity.IsAuthenticated)
+		{
+			UserId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+		}
+	}
 	private async Task Logout()
 	{
 		await _localStorageService.RemoveItemAsync("jwt_token");
 		_navigationManager.NavigateTo("/");
+	}
+	private string DisplayFullName(List<Claim> claims)
+	{
+		var firstName = claims.Where(_ => _.Type == "FirstName").Select(_ => _.Value).FirstOrDefault();
+		var lastName = claims.Where(_ => _.Type == "LastName").Select(_ => _.Value).FirstOrDefault();
+		if (!string.IsNullOrEmpty(firstName) || !string.IsNullOrEmpty(lastName))
+		{
+			return $"{firstName}  {lastName}";
+		}
+		var email = claims.Where(_ => _.Type == "Email").Select(_ => _.Value).FirstOrDefault();
+		return email;
 	}
 }
