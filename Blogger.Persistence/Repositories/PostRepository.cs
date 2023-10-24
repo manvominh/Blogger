@@ -25,7 +25,10 @@ namespace Blogger.Persistence.Repositories
 
         public async Task<Post> GetPostById(int postId)
         {
-            return await _postRepository.GetByIdAsync(postId);
+            return await _postRepository.Entities
+                .Include(x => x.Comments)
+                    .ThenInclude(x => x.User)
+                .FirstOrDefaultAsync(x => x.Id == postId);
         }
     }
 }
