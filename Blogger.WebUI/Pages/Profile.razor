@@ -23,74 +23,67 @@ else
 						</ol>
 					</nav>
 				</div>
-			</div>
-			@if (profile == null)
-			{
-				<p><em>Loading...</em></p>
-			}
-			else
-			{
-				<EditForm EditContext="@editContext" OnValidSubmit="UpdateUser" @onreset="HandleReset">
+			</div>			
+			<EditForm EditContext="@editContext" OnValidSubmit="UpdateUser" @onreset="HandleReset">
 
-					<DataAnnotationsValidator />
-					@if (!string.IsNullOrEmpty(APIErrorMessages))
-					{
-						<p class="text-danger">@APIErrorMessages</p>
-					}
+				<DataAnnotationsValidator />
+				@if (!string.IsNullOrEmpty(APIErrorMessages))
+				{
+					<p class="text-danger">@APIErrorMessages</p>
+				}
 
-					<div class="row">
-						<div class="col-12 mb-3">
-							<label class="form-label">Email address</label>
-							<InputText @bind-Value="profile.Email" class="form-control" placeholder="Your Email" readonly="true" />
-							<ValidationMessage For="@(() => profile.Email)" />
-						</div>
-						<div class="col-6 mb-3">
-							<label class="form-label">Password</label>
-							<InputText @bind-Value="profile.Password" class="form-control" type="password" placeholder="Password" />
-							<ValidationMessage For="@(() => profile.Password)" />
-						</div>
-						<div class="col-6 mb-3">
-							<label class="form-label">Confirm Password</label>
-							<InputText @bind-Value="profile.ConfirmPassword" class="form-control" type="password" placeholder="Confirm Password" />
-							<ValidationMessage For="@(() => profile.ConfirmPassword)" />
-						</div>
-						<div class="col-6 mb-3">
-							<label class="form-label">First Name</label>
-							<InputText @bind-Value="profile.FirstName" class="form-control" placeholder="First Name" />
-							<ValidationMessage For="@(() => profile.FirstName)" />
-						</div>
-						<div class="col-6 mb-3">
-							<label class="form-label">Last Name</label>
-							<InputText @bind-Value="profile.LastName" class="form-control" placeholder="Last Name" />
-							<ValidationMessage For="@(() => profile.LastName)" />
-						</div>
-						<div class="col-6 mb-3">
-							<label class="form-label">Gender</label>
-							<InputSelect @bind-Value="profile.Gender" class="form-control" placeholder="Gender">
-								<option value=""></option>
-								<option value="Mr">Mr</option>
-								<option value="Mrs">Mrs</option>
-								<option value="Miss">Miss</option>
-								<option value="Ms">Ms</option>
-							</InputSelect>
-							<ValidationMessage For="@(() => profile.Gender)" />
-						</div>
-						<div class="col-6 mb-3">
-							<label class="form-label">Date Of Birth</label>
-							<InputDate @bind-Value="profile.DateOfBirth" class="form-control" placeholder="Date of Birth" />
-							<ValidationMessage For="@(() => profile.DateOfBirth)" />
-						</div>
-						<div class="col-12 mb-3">
-							<InputTextArea @bind-Value="profile.Address" class="form-control" placeholder="Address" />
-							<ValidationMessage For="@(() => profile.Address)" />
-						</div>
-
-						<div class="col-12">
-							<input type="submit" value="Update" class="btn btn-primary">
-						</div>
+				<div class="row">
+					<div class="col-12 mb-3">
+						<label class="form-label">Email address</label>
+						<InputText @bind-Value="profile.Email" class="form-control" placeholder="Your Email" readonly="true" />
+						<ValidationMessage For="@(() => profile.Email)" />
 					</div>
-				</EditForm>
-			}
+					<div class="col-6 mb-3">
+						<label class="form-label">Password</label>
+						<InputText @bind-Value="profile.Password" class="form-control" type="password" placeholder="Password" />
+						<ValidationMessage For="@(() => profile.Password)" />
+					</div>
+					<div class="col-6 mb-3">
+						<label class="form-label">Confirm Password</label>
+						<InputText @bind-Value="profile.ConfirmPassword" class="form-control" type="password" placeholder="Confirm Password" />
+						<ValidationMessage For="@(() => profile.ConfirmPassword)" />
+					</div>
+					<div class="col-6 mb-3">
+						<label class="form-label">First Name</label>
+						<InputText @bind-Value="profile.FirstName" class="form-control" placeholder="First Name" />
+						<ValidationMessage For="@(() => profile.FirstName)" />
+					</div>
+					<div class="col-6 mb-3">
+						<label class="form-label">Last Name</label>
+						<InputText @bind-Value="profile.LastName" class="form-control" placeholder="Last Name" />
+						<ValidationMessage For="@(() => profile.LastName)" />
+					</div>
+					<div class="col-6 mb-3">
+						<label class="form-label">Gender</label>
+						<InputSelect @bind-Value="profile.Gender" class="form-control" placeholder="Gender">
+							<option value=""></option>
+							<option value="Mr">Mr</option>
+							<option value="Mrs">Mrs</option>
+							<option value="Miss">Miss</option>
+							<option value="Ms">Ms</option>
+						</InputSelect>
+						<ValidationMessage For="@(() => profile.Gender)" />
+					</div>
+					<div class="col-6 mb-3">
+						<label class="form-label">Date Of Birth</label>
+						<InputDate @bind-Value="profile.DateOfBirth" class="form-control" placeholder="Date of Birth" />
+						<ValidationMessage For="@(() => profile.DateOfBirth)" />
+					</div>
+					<div class="col-12 mb-3">
+						<InputTextArea @bind-Value="profile.Address" class="form-control" placeholder="Address" />
+						<ValidationMessage For="@(() => profile.Address)" />
+					</div>
+
+					<div class="col-12">
+						<input type="submit" value="Update" class="btn btn-primary">
+					</div>
+				</div>
+			</EditForm>			
 		</div>
 	</div>
 }
