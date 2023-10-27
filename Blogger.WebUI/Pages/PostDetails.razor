@@ -129,7 +129,7 @@ else
     public async Task GetPostDetails()
     {
         var httpClient = _httpClientFactory.CreateClient("blog");
-        var response = await httpClient.PostAsJsonAsync("/api/Posts/PostDetails", postId);
+        var response = await httpClient.GetAsync($"/api/Posts/{postId}");
         if (response.StatusCode == HttpStatusCode.BadRequest)
         {
             var errors = await response.Content.ReadFromJsonAsync<Dictionary<string, List<string>>>();
@@ -166,7 +166,7 @@ else
             commentModel.PostId = postId;
             commentModel.UserId = CurrentUserId;
             var httpClient = _httpClientFactory.CreateClient("blog");
-            var response = await httpClient.PostAsJsonAsync<CommentDto>("/api/Comments/SaveComment", commentModel);
+            var response = await httpClient.PostAsJsonAsync<CommentDto>("/api/Comments", commentModel);
             if (response.StatusCode == HttpStatusCode.BadRequest)
             {
                 var errors = await response.Content.ReadFromJsonAsync<Dictionary<string, List<string>>>();

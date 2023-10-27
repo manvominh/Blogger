@@ -46,11 +46,7 @@ namespace Blogger.Infrastructure.Services
                 UserId = postDto.UserId,
                 CreatedDate = DateTime.UtcNow,
             };
-            if (postDto.Id == 0)
-                await _unitOfWork.Repository<Post>().AddAsync(post);
-            else
-                await _unitOfWork.Repository<Post>().UpdateAsync(post);
-            //await _unitOfWork.Repository<Post>().AddAsync(post);
+            await _unitOfWork.Repository<Post>().AddAsync(post);
             await _unitOfWork.Save();
 			return (true, post);
 		}

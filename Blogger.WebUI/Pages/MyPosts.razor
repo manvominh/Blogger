@@ -54,7 +54,7 @@ else
 		{
 			var userIdIdentifier = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 			var httpClient = _httpClientFactory.CreateClient("blog");
-			var response = await httpClient.PostAsJsonAsync($"api/Posts/GetPostsByUserId", userIdIdentifier);
+			var response = await httpClient.GetAsync($"/api/Posts/GetPostsByUserId/{userIdIdentifier}");
 
 			if (response.StatusCode == HttpStatusCode.BadRequest)
 			{

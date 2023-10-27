@@ -20,8 +20,7 @@ namespace Blogger.API.Controllers
         }
         [Authorize]
         [HttpPost]
-        [Route("SaveComment")]
-        public async Task<IActionResult> SaveComment([FromBody] CommentDto commentDto)
+        public async Task<IActionResult> SaveComment(CommentDto commentDto)
         {
             var result = await _commentService.SaveComment(commentDto);
             if (result.IsCommentSaved)

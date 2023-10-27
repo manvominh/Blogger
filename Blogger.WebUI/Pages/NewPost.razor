@@ -151,7 +151,7 @@ else
 		post.BodyText = BodyPost;
 		post.UserId = UserId;
 		var httpClient = _httpClientFactory.CreateClient("blog");
-		var response = await httpClient.PostAsJsonAsync<PostDto>("/api/Posts/SavePost", post);
+		var response = await httpClient.PostAsJsonAsync<PostDto>("/api/Posts", post);
 		if (response.StatusCode == HttpStatusCode.BadRequest)
 		{
 			var errors = await response.Content.ReadFromJsonAsync<Dictionary<string, List<string>>>();

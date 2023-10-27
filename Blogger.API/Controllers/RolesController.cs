@@ -22,9 +22,8 @@ namespace Blogger.API.Controllers
         {
             return await _roleService.GetAll();
         }
-        [HttpPost]
-        [Route("GetRoleById")]
-        public async Task<IActionResult> GetRoleById([FromBody] int roleId)
+        [HttpGet("{roleId}")]
+        public async Task<IActionResult> GetRoleById(int roleId)
         {
             var result = await _roleService.GetRoleById(roleId);
             if (result != null)

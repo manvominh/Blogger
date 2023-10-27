@@ -1,0 +1,15 @@
+﻿.pop-container {
+    position: relative;
+}
+
+.popconfirm {
+    background-color: white;
+    border-style: solid;
+    border-width: 1px;
+    border-color: lightblue;
+    width: 250px;
+    position: absolute;
+    top: -50px;
+    padding: 10px;
+    border-radius: 8px;
+}

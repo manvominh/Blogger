@@ -26,8 +26,7 @@ namespace Blogger.API.Controllers
 		}
 		[Authorize]
 		[HttpPost]
-		[Route("SavePost")]
-		public async Task<IActionResult> SavePost([FromBody] PostDto post)
+		public async Task<IActionResult> SavePost(PostDto post)
 		{
 			var result = await _postService.SavePost(post);
 			if (result.IsPostSaved)
@@ -39,8 +38,7 @@ namespace Blogger.API.Controllers
 		}
 		[HttpPut]
 		[Authorize]
-		[Route("UpdatePost")]
-		public async Task<IActionResult> UpdatePost([FromBody] PostDto post)
+		public async Task<IActionResult> UpdatePost(PostDto post)
 		{
 			var result = await _postService.UpdatePost(post);
 			if (result.IsPostUpdated)
@@ -51,9 +49,8 @@ namespace Blogger.API.Controllers
 			return BadRequest(ModelState);
 		}
 		[AllowAnonymous]
-		[HttpPost]
-		[Route("PostDetails")]
-		public async Task<IActionResult> PostDetails([FromBody] int postId)
+        [HttpGet("{postId}")]
+        public async Task<IActionResult> PostDetails(int postId)
 		{
 			var result = await _postService.GetPostById(postId);
 			if (result != null)
@@ -64,9 +61,8 @@ namespace Blogger.API.Controllers
 			return BadRequest(ModelState);
 		}
 		[Authorize]
-		[HttpPost]
-		[Route("GetPostsByUserId")]
-		public async Task<IActionResult> GetPostsByUserId([FromBody] int userId)
+		[HttpGet("GetPostsByUserId/{userId}")]
+		public async Task<IActionResult> GetPostsByUserId(int userId)
 		{
 			var result = await _postService.GetPostsByUserId(userId);
 			if (result != null)

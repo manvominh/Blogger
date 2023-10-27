@@ -134,7 +134,8 @@ else
 			if (postId != 0)
 			{
 				var httpClient = _httpClientFactory.CreateClient("blog");
-				var response = await httpClient.PostAsJsonAsync<string>("/api/Posts/PostDetails", postId.ToString());
+				var response = await httpClient.GetAsync($"/api/Posts/{postId}");
+
 				if (response.StatusCode == HttpStatusCode.BadRequest)
 				{
 					var errors = await response.Content.ReadFromJsonAsync<Dictionary<string, List<string>>>();
@@ -201,7 +202,7 @@ else
 		post.BodyText = BodyPost;
 		post.UserId = UserId;
 		var httpClient = _httpClientFactory.CreateClient("blog");
-		var response = await httpClient.PutAsJsonAsync<PostDto>("/api/Posts/UpdatePost", post);
+		var response = await httpClient.PutAsJsonAsync<PostDto>("/api/Posts", post);
 		if (response.StatusCode == HttpStatusCode.BadRequest)
 		{
 			var errors = await response.Content.ReadFromJsonAsync<Dictionary<string, List<string>>>();
