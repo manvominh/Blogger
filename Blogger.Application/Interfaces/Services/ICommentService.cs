@@ -7,5 +7,6 @@ namespace Blogger.Application.Interfaces.Services
     {
         Task<IEnumerable<Comment>> GetCommentsByPostId(int postId);
         Task<(bool IsCommentSaved, Comment comment)> SaveComment(CommentDto comment);
+        Task<bool> DeleteComment(int commentId);
     }
 }

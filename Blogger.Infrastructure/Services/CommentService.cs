@@ -2,6 +2,7 @@
 using Blogger.Application.Interfaces.Repositories;
 using Blogger.Application.Interfaces.Services;
 using Blogger.Domain.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace Blogger.Infrastructure.Services
 {
@@ -14,6 +15,16 @@ namespace Blogger.Infrastructure.Services
             _commentRepository = commentRepository;
             _unitOfWork = unitOfWork;   
         }
+
+        public async Task<bool> DeleteComment(int commentId)
+        {
+            var comment = await _unitOfWork.Repository<Comment>().Entities.FirstOrDefaultAsync(x => x.Id == commentId);
+            if (comment == null) { return false; }
+            await _unitOfWork.Repository<Comment>().DeleteAsync(comment);
+            await _unitOfWork.Save();
+            return true;
+        }
+
         public async Task<IEnumerable<Comment>> GetCommentsByPostId(int postId)
         {
             return await _commentRepository.GetCommentsByPostId(postId);

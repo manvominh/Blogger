@@ -1,5 +1,6 @@
 ﻿using Blogger.Application.Dtos;
 using Blogger.Application.Interfaces.Services;
+using Blogger.Domain.Entities;
 using Blogger.Infrastructure.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -28,6 +29,18 @@ namespace Blogger.API.Controllers
                 return Ok(result.comment);
             }
             ModelState.AddModelError("SavePostError", "Save Post error.");
+            return BadRequest(ModelState);
+        }
+        [Authorize]
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var result = await _commentService.DeleteComment(id);
+            if (result)
+            {
+                return Ok(result);
+            }
+            ModelState.AddModelError("DeleteCommentError", "Delete Comment error.");
             return BadRequest(ModelState);
         }
     }

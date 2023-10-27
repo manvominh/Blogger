@@ -6,6 +6,7 @@
 @inject IHttpClientFactory _httpClientFactory
 @inject NavigationManager _navigationManager
 @inject IToastService _toastService
+@inject IJSRuntime JsRuntime
 @if (Post == null)
 {
     <DisplayLoadingIcon />
@@ -78,7 +79,7 @@ else
                                         @comment.CreatedDate.ToString() &nbsp;&nbsp;&nbsp;&nbsp;@*  January 9, 2018 at 2:21pm *@
                                             @if (comment.UserId == CurrentUserId)
                                         {
-                                            <a style="text-align:right;"> <i class="fas fa-trash fa-lg me-3 fa-fw" /></a>
+                                                <a style="text-align:right;" class="text-danger" @onclick="(async () => await DeleteComment(comment.Id))"> <i class="fas fa-trash fa-lg me-3 fa-fw" /></a>
                                         }
                                     </div>
                                     <p>@comment.CommentText</p>
@@ -99,6 +100,7 @@ else
         </div>
     </div>
 </section>
+   @*  <Blogger.WebUI.Pages.Addon.PopupConfirmation ConfirmedChanged="ShowPopupConfirmation" /> *@
 }
 @code {
     [Parameter]
@@ -161,9 +163,9 @@ else
     {
         if(IsAuthenticed)
         {
-            var httpClient = _httpClientFactory.CreateClient("blog");
             commentModel.PostId = postId;
             commentModel.UserId = CurrentUserId;
+            var httpClient = _httpClientFactory.CreateClient("blog");
             var response = await httpClient.PostAsJsonAsync<CommentDto>("/api/Comments/SaveComment", commentModel);
             if (response.StatusCode == HttpStatusCode.BadRequest)
             {
@@ -196,5 +198,30 @@ else
         {
             _navigationManager.NavigateTo("/login");
         }
+    }
+    protected async Task DeleteComment(int commenId)
+    {
+        bool confirm = await JsRuntime.InvokeAsync<bool>("confirm", $"Are you sure you want to delete the this comment?");
+        if (confirm)
+        {
+            var httpClient = _httpClientFactory.CreateClient("blog");
+            var response = await httpClient.DeleteAsync($"/api/Comments/{commenId}");
+            if(response.IsSuccessStatusCode)
+            {
+                _toastService.ShowSuccess("Delete Comment successfully");
+                await GetPostDetails();
+                StateHasChanged();
+            }
+            else
+                _toastService.ShowError("Delete Comment failed");
+        }
+        else
+        {
+            _toastService.ShowInfo("No Confirmed");
+        }
+    }
+    public void ShowPopupConfirmation(bool test)
+    {
+        Console.WriteLine(test);
     }
 }
