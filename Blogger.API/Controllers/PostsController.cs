@@ -24,6 +24,32 @@ namespace Blogger.API.Controllers
 		{
 			return await _postService.GetAll();
 		}
+		[Authorize]
+		[HttpPost]
+		[Route("SavePost")]
+		public async Task<IActionResult> SavePost([FromBody] PostDto post)
+		{
+			var result = await _postService.SavePost(post);
+			if (result.IsPostSaved)
+			{
+				return Ok(result.post);
+			}
+			ModelState.AddModelError("SavePostError", "Save Post error.");
+			return BadRequest(ModelState);
+		}
+		[HttpPut]
+		[Authorize]
+		[Route("UpdatePost")]
+		public async Task<IActionResult> UpdatePost([FromBody] PostDto post)
+		{
+			var result = await _postService.UpdatePost(post);
+			if (result.IsPostUpdated)
+			{
+				return Ok(result.Message);
+			}
+			ModelState.AddModelError("UpdatedPostError", "Updated Post error.");
+			return BadRequest(ModelState);
+		}
 		[AllowAnonymous]
 		[HttpPost]
 		[Route("PostDetails")]

@@ -1,4 +1,5 @@
-﻿using Blogger.Application.Interfaces.Repositories;
+﻿using Blogger.Application.Dtos;
+using Blogger.Application.Interfaces.Repositories;
 using Blogger.Application.Interfaces.Services;
 using Blogger.Domain.Entities;
 using System;
@@ -12,9 +13,11 @@ namespace Blogger.Infrastructure.Services
     public class PostService : IPostService
     {
         private readonly IPostRepository _postRepository;
-        public PostService(IPostRepository postRepository)
+		private readonly IUnitOfWork _unitOfWork;
+		public PostService(IPostRepository postRepository, IUnitOfWork unitOfWork)
         {
             _postRepository = postRepository;
+            _unitOfWork = unitOfWork;
         }
         public async Task<IEnumerable<Post>> GetAll()
         {
@@ -30,5 +33,40 @@ namespace Blogger.Infrastructure.Services
         {
             return await _postRepository.GetPostsByUserId(userId);
         }
-    }
+
+		public async Task<(bool IsPostSaved, Post post)> SavePost(PostDto postDto)
+		{
+            var post = new Post()
+            {
+                Id = postDto.Id,
+                Title = postDto.Title,
+                Introduction = postDto.Introduction,
+                BodyText = postDto.BodyText,
+                IsPublished = postDto.IsPublished,
+                UserId = postDto.UserId,
+                CreatedDate = DateTime.UtcNow,
+            };
+            if (postDto.Id == 0)
+                await _unitOfWork.Repository<Post>().AddAsync(post);
+            else
+                await _unitOfWork.Repository<Post>().UpdateAsync(post);
+            //await _unitOfWork.Repository<Post>().AddAsync(post);
+            await _unitOfWork.Save();
+			return (true, post);
+		}
+
+		public async Task<(bool IsPostUpdated, string Message)> UpdatePost(PostDto postDto)
+		{
+            var post = await _postRepository.GetPostById(postDto.Id);
+            post.Title = postDto.Title;
+            post.Introduction = postDto.Introduction;
+            post.BodyText = postDto.BodyText;
+            post.IsPublished = postDto.IsPublished;
+            post.UserId = postDto.UserId;
+			
+			await _unitOfWork.Repository<Post>().UpdateAsync(post);
+			await _unitOfWork.Save();
+			return (true, "Success");
+		}
+	}
 }

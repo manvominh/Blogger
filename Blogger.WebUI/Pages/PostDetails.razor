@@ -21,14 +21,14 @@ else
             <div class="col-md-12 col-lg-8 main-content">
 
                 <div class="post-content-body">
-                    <p>@Post.Title</p>
+                    <p><b>@Post.Title</b></p>
                     <p>@Post.Introduction</p>
                     <div class="row my-4">
                         <div class="col-md-12 mb-4">
                             <img src="images/@Post.Image" alt="Image placeholder" class="img-fluid rounded">
                         </div>
                     </div>
-                        <p>@Post.BodyText</p>
+                        <p>@((MarkupString)Post.BodyText)</p>
                 </div>
 
 
@@ -80,7 +80,6 @@ else
                             <div class="form-group">
                                 <input type="submit" value="Post Comment" class="btn btn-primary">
                             </div>
-
                         </form>
                     </div>
                 </div>

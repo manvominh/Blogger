@@ -34,7 +34,7 @@
 										<a href="/myposts/@UserId">Posts</a>
 										<ul class="dropdown">
 											<li><a href="/myposts/@UserId">My Post</a></li>
-											<li><a href="/postdetails">New Post</a></li>
+											<li><a href="/newpost">New Post</a></li>
 										</ul>
 									</li>
 								</Authorized>
@@ -55,8 +55,7 @@
 									<li class="has-children">
 										<a href="/profile"><i class="fas fa-user"></i></a>
 										<ul class="dropdown">
-											<li><span>Welcome @DisplayFullName(context.User.Claims.ToList())</span></li>
-											<li><a href="/profile" title="">Profile</a></li>
+											<li><a href="/profile" title="Welcome @DisplayFullName(context.User.Claims.ToList())">Profile</a></li>
 											<li><a @onclick="Logout" href="javascript:void(0)">Logout</a></li>
 										</ul>
 									</li>

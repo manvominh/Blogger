@@ -1,0 +1,232 @@
+﻿@page "/createeditpost/{postId:int}"
+
+@using AutoMapper;
+@using Blogger.Application.Dtos;
+@using Blogger.Application.Interfaces.Services;
+@using Blogger.Domain.Entities;
+@using Blazored.TextEditor
+@using System.Security.Claims;
+@inject IHttpClientFactory _httpClientFactory
+@inject IToastService _toastService
+@inject NavigationManager _navigationManager
+@inject IMapper _mapper
+@if (post == null)
+{
+	<p><em>Loading...</em></p>
+}
+else
+{
+	<div>
+		<div class="container py-5">
+			<div class="row">
+				<div class="col">
+					<nav aria-label="breadcrumb" class="bg-light rounded-3 p-3 mb-4">
+						<ol class="breadcrumb mb-0">
+							<li class="breadcrumb-item active" aria-current="page"><h3>@(postId != 0 ? "Edit Post" : "New Post")</h3></li>
+						</ol>
+					</nav>
+				</div>
+			</div>
+			<EditForm EditContext="@editContext"  OnValidSubmit="CreateOrEdit" @onreset="HandleReset">
+
+				<DataAnnotationsValidator />
+				@if (!string.IsNullOrEmpty(APIErrorMessages))
+				{
+					<p class="text-danger">@APIErrorMessages</p>
+				}
+				
+				<div class="form-group">
+					<label class="form-label">Title</label>
+					<InputText @bind-Value="post.Title" class="form-control" Placeholder="Enter Title" />
+					<ValidationMessage For="@(() => post.Title)" />
+				</div>
+				<div class="form-group">
+					<label class="form-label">Introduction</label>
+					<InputText @bind-Value="post.Introduction" class="form-control" Placeholder="Enter Introduction" />
+					<ValidationMessage For="@(() => post.Introduction)" />
+				</div>
+				<div class="form-group">
+					<label for="message">Body Post</label>
+					<BlazoredTextEditor @ref="@QuillHtml">
+						<ToolbarContent>
+							<select class="ql-header">
+								<option selected=""></option>
+								<option value="1"></option>
+								<option value="2"></option>
+								<option value="3"></option>
+								<option value="4"></option>
+								<option value="5"></option>
+							</select>
+							<span class="ql-formats">
+								<button class="ql-bold"></button>
+								<button class="ql-italic"></button>
+								<button class="ql-underline"></button>
+								<button class="ql-strike"></button>
+							</span>
+							<span class="ql-formats">
+								<select class="ql-color"></select>
+								<select class="ql-background"></select>
+							</span>
+							<span class="ql-formats">
+								<button class="ql-list" value="ordered"></button>
+								<button class="ql-list" value="bullet"></button>
+							</span>
+							<span class="ql-formats">
+								<button class="ql-link"></button>
+							</span>
+						</ToolbarContent>
+						<EditorContent>
+							
+						</EditorContent>
+					</BlazoredTextEditor>
+				</div>
+				<br />
+				<div class="form-group">
+					<label class="form-label">Publish</label>
+					<InputCheckbox @bind-Value="post.IsPublished"  />
+				</div>
+				<br/>
+				<div class="form-group">
+					<input type="submit" value="@(postId != 0 ? "Update Post" : "Save Post")" class="btn btn-primary">
+				</div>
+
+			</EditForm>
+		</div>
+	</div>
+}
+
+@code {
+	public BlazoredTextEditor QuillHtml { get; set; } = new BlazoredTextEditor();
+	
+	[Parameter]
+	public int postId { get; set; }
+	public string BodyPost { get; set; }
+	public int UserId { get; set; }
+
+	[CascadingParameter]
+	private Task<AuthenticationState> authenticationState { get; set; }
+
+	PostDto post;
+	private EditContext editContext;
+	private string APIErrorMessages;
+
+	protected async override Task OnInitializedAsync()
+	{
+
+		var authState = await authenticationState;
+		var user = authState.User;
+
+		if (user.Identity.IsAuthenticated)
+		{
+			UserId = int.Parse(user.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+			if (postId != 0)
+			{
+				var httpClient = _httpClientFactory.CreateClient("blog");
+				var response = await httpClient.PostAsJsonAsync<string>("/api/Posts/PostDetails", postId.ToString());
+				if (response.StatusCode == HttpStatusCode.BadRequest)
+				{
+					var errors = await response.Content.ReadFromJsonAsync<Dictionary<string, List<string>>>();
+					if (errors.Count > 0)
+					{
+						foreach (var item in errors)
+						{
+							foreach (var errorMessage in item.Value)
+							{
+								APIErrorMessages = !string.IsNullOrEmpty(APIErrorMessages) ? $"{APIErrorMessages} | {errorMessage}" : $"{errorMessage}";
+							}
+						}
+					}
+					_toastService.ShowError(APIErrorMessages);
+				}
+				else if (response.IsSuccessStatusCode)
+				{
+					var postInfo = await response.Content.ReadFromJsonAsync<Post>();
+					post = _mapper.Map<PostDto>(postInfo);
+				}
+				else
+				{
+					_toastService.ShowError("Error on calling API");
+				}
+			}
+			else
+				post = new();
+		}
+		else
+		{
+			_navigationManager.NavigateTo("/login");
+		}
+		editContext = new EditContext(post);
+	}
+	protected async override Task OnAfterRenderAsync(bool firstRender)
+	{
+		if(!firstRender) return;
+		bool loading = true;
+		while(loading)
+		{
+			try
+			{
+				if (!string.IsNullOrEmpty(post.BodyText))
+				{
+					await this.QuillHtml.LoadHTMLContent(post.BodyText);
+					loading = false;
+				}
+			}
+			catch
+			{
+				await Task.Delay(10);
+				loading = true;
+			}
+		}
+		
+		
+	}
+	private async Task CreateOrEdit()
+	{
+		if (!(await ValidateBodyPost())) return;
+
+		post.BodyText = await QuillHtml.GetHTML();
+		post.UserId = UserId;
+		var httpClient = _httpClientFactory.CreateClient("blog");
+		var response = await httpClient.PostAsJsonAsync<PostDto>("/api/Posts/SavePost", post);
+		if (response.StatusCode == HttpStatusCode.BadRequest)
+		{
+			var errors = await response.Content.ReadFromJsonAsync<Dictionary<string, List<string>>>();
+			if (errors.Count > 0)
+			{
+				foreach (var item in errors)
+				{
+					foreach (var errorMessage in item.Value)
+					{
+						APIErrorMessages = !string.IsNullOrEmpty(APIErrorMessages) ? $"{APIErrorMessages} | {errorMessage}" : $"{errorMessage}";
+					}
+				}
+			}
+			_toastService.ShowError(APIErrorMessages);
+		}
+		else if (response.IsSuccessStatusCode)
+		{
+			var successfulMessage = postId == 0 ? "Save Post successfully" : "Update Post successfully";
+			_toastService.ShowSuccess(successfulMessage);
+		}
+		else
+		{
+			_toastService.ShowError("Error on calling API");
+		}
+		//_toastService.ShowInfo("button Create Or Edit Post is pressed.");
+	}
+	private void HandleReset()
+	{
+		post = new PostDto();
+		editContext = new EditContext(post);
+	}
+	private async Task<bool> ValidateBodyPost()
+	{
+		BodyPost = await this.QuillHtml.GetHTML();
+		if (BodyPost.Replace(" ", string.Empty).Equals("<p></p>"))
+		{
+			_toastService.ShowError("Body Text is not empty. Please enter Body Post.");
+			return false;
+		}
+		return true;
+	}
+}
