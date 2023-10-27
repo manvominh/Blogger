@@ -12,7 +12,7 @@
 @inject IMapper _mapper
 @if (post == null)
 {
-	<p><em>Loading...</em></p>
+	<DisplayLoadingIcon />
 }
 else
 {
@@ -153,6 +153,7 @@ else
 				else if (response.IsSuccessStatusCode)
 				{
 					var postInfo = await response.Content.ReadFromJsonAsync<Post>();
+					if (postInfo.UserId != UserId) return;
 					post = _mapper.Map<PostDto>(postInfo);
 				}
 				else

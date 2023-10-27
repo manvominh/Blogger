@@ -1,11 +1,12 @@
 ﻿@page "/"
 @using Blogger.Domain.Entities;
 @using Blogger.Application.Interfaces.Services;
+@using System.Security.Claims;
 @inject IHttpClientFactory _httpClientFactory
 @inject IToastService _toastService
 @if (Posts == null)
 {
-	<p><em>Loading...</em></p>
+	<DisplayLoadingIcon />
 }
 else
 {
@@ -51,6 +52,7 @@ else
 	[Inject]
 	public IPostService PostService { get; set; }
 	private string APIErrorMessages;
+	
 	protected override async Task OnInitializedAsync()
 	{
 		try
@@ -85,7 +87,7 @@ else
 		catch (Exception ex)
 		{
 			//ErrorMessage = ex.Message;
-			throw;
+			_toastService.ShowError(ex.Message);
 		}
 
 	}

@@ -1,4 +1,5 @@
 ﻿@using Blogger.Domain.Entities;
+@using System.Security.Claims;
 @foreach (var item in Posts)
 {
 	<div class="blog-entry d-flex blog-entry-search-item">
@@ -6,7 +7,13 @@
 			<img src="images/@item.Image" alt="Image" class="img-fluid">
 		</a>
 		<div>
-			<span class="date">@item.PublishedDate <a href="/editpost/@item.Id">Edit</a></span>
+			<span class="date">
+				@item.CreatedDate &nbsp;&nbsp;&nbsp;
+				@if (item.UserId == CurrentUserId)
+				{
+					<a href="/editpost/@item.Id">Edit Post</a>
+				}
+			</span>
 			<h2><a href="/postdetails/@item.Id">@item.Title</a></h2>
 			<p>@item.Introduction</p>
 			<p><a href="/postdetails/@item.Id" class="btn btn-sm btn-outline-primary">Read More</a></p>
@@ -16,4 +23,19 @@
 @code {
 	[Parameter]
 	public IEnumerable<Post> Posts { get; set; }
+
+	public int CurrentUserId { get; set; }
+	[CascadingParameter]
+	private Task<AuthenticationState> authenticationState { get; set; }
+	protected override async Task OnInitializedAsync()
+	{
+
+		var authState = await authenticationState;
+		var user = authState.User;
+
+		if (user.Identity.IsAuthenticated)
+		{
+			CurrentUserId = int.Parse(user.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+		}
+	}
 }

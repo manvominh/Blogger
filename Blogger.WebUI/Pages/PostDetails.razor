@@ -8,10 +8,16 @@
 @inject IToastService _toastService
 @if (Post == null)
 {
-	<p><em>Loading...</em></p>
+    <DisplayLoadingIcon />
 }
 else
 {
+    <h3>
+        @if (Post.UserId == CurrentUserId)
+        {
+            <a href="/editpost/@Post.Id">Edit This Post</a>
+        }
+    </h3>
     @if (!string.IsNullOrEmpty(APIErrorMessages))
     {
         <p class="text-danger">@APIErrorMessages</p>
@@ -65,10 +71,18 @@ else
                                     <img src="images/person_1.jpg" alt="Image placeholder">
                                 </div>
                                 <div class="comment-body">
-                                            <h3>@comment.User.FirstName @comment.User.LastName</h3>
-                                    <div class="meta">@comment.CreatedDate.ToString() @*  January 9, 2018 at 2:21pm *@</div>
+                                    <h3>
+                                        @comment.User.FirstName @comment.User.LastName &nbsp;&nbsp;&nbsp;&nbsp;
+                                    </h3>
+                                    <div class="meta">
+                                        @comment.CreatedDate.ToString() &nbsp;&nbsp;&nbsp;&nbsp;@*  January 9, 2018 at 2:21pm *@
+                                            @if (comment.UserId == CurrentUserId)
+                                        {
+                                            <a style="text-align:right;"> <i class="fas fa-trash fa-lg me-3 fa-fw" /></a>
+                                        }
+                                    </div>
                                     <p>@comment.CommentText</p>
-                                    <p><a href="#" class="reply rounded">Reply</a></p>
+                                   @*  <p><a href="#" class="reply rounded">Reply</a></p> *@
                                 </div>
                             </li>
                         }
@@ -95,7 +109,7 @@ else
     [CascadingParameter]
     private Task<AuthenticationState> authenticationState { get; set; }
     private bool IsAuthenticed{ get; set; }
-    private int UserId{ get; set; }
+    private int CurrentUserId { get; set; }
     public CommentDto commentModel = new CommentDto();
     private string APIErrorMessages;
     protected override async Task OnInitializedAsync()
@@ -105,7 +119,7 @@ else
         if (user.Identity.IsAuthenticated)
         {
             IsAuthenticed = user.Identity.IsAuthenticated;
-            UserId = int.Parse(user.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+            CurrentUserId = int.Parse(user.FindFirst(ClaimTypes.NameIdentifier)?.Value);
         }
 
         await GetPostDetails();
@@ -149,7 +163,7 @@ else
         {
             var httpClient = _httpClientFactory.CreateClient("blog");
             commentModel.PostId = postId;
-            commentModel.UserId = UserId;
+            commentModel.UserId = CurrentUserId;
             var response = await httpClient.PostAsJsonAsync<CommentDto>("/api/Comments/SaveComment", commentModel);
             if (response.StatusCode == HttpStatusCode.BadRequest)
             {

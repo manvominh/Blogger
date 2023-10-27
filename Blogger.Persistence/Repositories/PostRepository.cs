@@ -14,7 +14,9 @@ namespace Blogger.Persistence.Repositories
         }
         public async Task<IEnumerable<Post>> GetAll()
         {
-            return await _postRepository.GetAllAsync();
+            return await _postRepository.Entities
+                .Include(x => x.User)
+                .ToListAsync();
         }
 
         public async Task<IEnumerable<Post>> GetPostsByUserId(int userId)
