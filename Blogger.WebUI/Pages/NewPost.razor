@@ -45,7 +45,7 @@ else
 					<InputText @bind-Value="post.Introduction" class="form-control" placeholder="Enter Introduction" />
 					<ValidationMessage For="@(() => post.Introduction)" />
 				</div>
-				<div class="form-group">
+				<div class="form-group" style="height:150px" placeholder="Enter Body Post">
 					<label>Body Post</label>
 					<BlazoredTextEditor @ref="@QuillHtml">
 						<ToolbarContent>
@@ -87,10 +87,13 @@ else
 							@((MarkupString)post.BodyText)
 						</EditorContent>
 					</BlazoredTextEditor>
-					@* <ValidationMessage For="@(() => post.BodyText)" /> *@
+					@if (!string.IsNullOrEmpty(ErrorBodyText))
+					{
+						<p class="text-danger">@ErrorBodyText</p>
+					}
 				</div>
 				<br />
-				<div class="form-group">
+				<div class="form-group" style="padding-top: 75px;">
 					<label class="form-label">Publish</label>
 					<InputCheckbox @bind-Value="post.IsPublished" />
 				</div>
@@ -108,6 +111,7 @@ else
 	[Parameter]
 	public int postId { get; set; }
 	public string BodyPost { get; set; }
+	public string ErrorBodyText { get; set; }
 	public int UserId { get; set; }
 
 	[CascadingParameter]
@@ -133,7 +137,12 @@ else
 		{
 			_navigationManager.NavigateTo("/login");
 		}
-		
+
+	}
+	async Task OnKeyPress(KeyboardEventArgs args)
+	{
+		if (args.Key == "Enter")
+			await CreatePost();
 	}
 	private async Task CreatePost()
 	{
@@ -179,9 +188,11 @@ else
 		BodyPost = await this.QuillHtml.GetHTML();
 		if (BodyPost.Replace(" ", string.Empty).Equals("<p></p>"))
 		{
+			ErrorBodyText = "Body Text can not be empty. Please enter Body Post.";
 			_toastService.ShowError("Body Text is not empty. Please enter Body Post.");
 			return false;
 		}
+		ErrorBodyText = string.Empty;
 		return true;
 	}
 }

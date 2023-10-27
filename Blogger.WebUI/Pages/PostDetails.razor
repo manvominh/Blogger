@@ -1,7 +1,10 @@
 ﻿@page "/postdetails/{postId:int}"
+@using Blogger.Application.Dtos;
 @using Blogger.Application.Interfaces.Services;
 @using Blogger.Domain.Entities;
+@using System.Security.Claims;
 @inject IHttpClientFactory _httpClientFactory
+@inject NavigationManager _navigationManager
 @inject IToastService _toastService
 @if (Post == null)
 {
@@ -38,6 +41,21 @@ else
 
 
                 <div class="pt-5 comment-wrap">
+                        @if (!IsAuthenticed)
+                        {
+                            <p class="text-warning">You have to be <a href="/login" class="text-danger">logged in</a> before you can comment.</p>
+                        }
+                        else
+                        {
+                            <div class="comment-form-wrap pt-5">
+                                <h3 class="mb-5">Leave a comment</h3>
+                                <EditForm Model="@commentModel" OnValidSubmit="@AddComment" class="p-5 bg-light">
+                                    <InputTextArea class="form-control" @bind-Value="@commentModel.CommentText" />
+                                    <ValidationMessage For="@(() => commentModel.CommentText)" />
+                                    <button type="submit" class="btn btn-primary">Add Comment</button>
+                                </EditForm>
+                            </div>
+                        }
                     <h3 class="mb-5 heading">@Post.Comments.Count Comments</h3>
                     <ul class="comment-list">
                         @foreach(var comment in Post.Comments)
@@ -57,38 +75,12 @@ else
                     </ul>
                     <!-- END comment-list -->
 
-                    <div class="comment-form-wrap pt-5">
-                        <h3 class="mb-5">Leave a comment</h3>
-                        <form action="#" class="p-5 bg-light">
-                            <div class="form-group">
-                                <label for="name">Name *</label>
-                                <input type="text" class="form-control" id="name">
-                            </div>
-                            <div class="form-group">
-                                <label for="email">Email *</label>
-                                <input type="email" class="form-control" id="email">
-                            </div>
-                            <div class="form-group">
-                                <label for="website">Website</label>
-                                <input type="url" class="form-control" id="website">
-                            </div>
-
-                            <div class="form-group">
-                                <label for="message">Message</label>
-                                <textarea name="" id="message" cols="30" rows="10" class="form-control"></textarea>
-                            </div>
-                            <div class="form-group">
-                                <input type="submit" value="Post Comment" class="btn btn-primary">
-                            </div>
-                        </form>
-                    </div>
                 </div>
 
             </div>
 
             <!-- END main-content -->
 
-            
 
         </div>
     </div>
@@ -100,9 +92,25 @@ else
     public Post Post { get; set; }
     [Inject]
     public IPostService PostService { get; set; }
-
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationState { get; set; }
+    private bool IsAuthenticed{ get; set; }
+    private int UserId{ get; set; }
+    public CommentDto commentModel = new CommentDto();
     private string APIErrorMessages;
     protected override async Task OnInitializedAsync()
+    {
+        var authState = await authenticationState;
+        var user = authState.User;
+        if (user.Identity.IsAuthenticated)
+        {
+            IsAuthenticed = user.Identity.IsAuthenticated;
+            UserId = int.Parse(user.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+        }
+
+        await GetPostDetails();
+    }
+    public async Task GetPostDetails()
     {
         var httpClient = _httpClientFactory.CreateClient("blog");
         var response = await httpClient.PostAsJsonAsync("/api/Posts/PostDetails", postId);
@@ -133,6 +141,46 @@ else
         else
         {
             _toastService.ShowError("Error on calling API");
+        }
+    }
+    public async Task AddComment()
+    {
+        if(IsAuthenticed)
+        {
+            var httpClient = _httpClientFactory.CreateClient("blog");
+            commentModel.PostId = postId;
+            commentModel.UserId = UserId;
+            var response = await httpClient.PostAsJsonAsync<CommentDto>("/api/Comments/SaveComment", commentModel);
+            if (response.StatusCode == HttpStatusCode.BadRequest)
+            {
+                var errors = await response.Content.ReadFromJsonAsync<Dictionary<string, List<string>>>();
+                if (errors.Count > 0)
+                {
+                    foreach (var item in errors)
+                    {
+                        foreach (var errorMessage in item.Value)
+                        {
+                            APIErrorMessages = !string.IsNullOrEmpty(APIErrorMessages) ? $"{APIErrorMessages} | {errorMessage}" : $"{errorMessage}";
+                        }
+                    }
+                }
+                _toastService.ShowError(APIErrorMessages);
+            }
+            else if (response.IsSuccessStatusCode)
+            {
+                _toastService.ShowSuccess("Save Comment Successfully.");
+                commentModel.CommentText = string.Empty;
+                await GetPostDetails();
+                StateHasChanged();
+            }
+            else
+            {
+                _toastService.ShowError("Error on calling API");
+            }
+        }
+        else
+        {
+            _navigationManager.NavigateTo("/login");
         }
     }
 }

@@ -18,7 +18,8 @@ namespace Blogger.Infrastructure.Extensions
                 .AddTransient<IUserService, UserService>()
                 .AddTransient<IPostService, PostService>()
 				.AddTransient<IRoleService, RoleService>()
-				;
+                .AddTransient<ICommentService, CommentService>()
+                ;
         }
     }
 }

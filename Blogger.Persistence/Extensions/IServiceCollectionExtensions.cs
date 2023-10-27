@@ -34,9 +34,10 @@ namespace Blogger.Persistence.Extensions
                 .AddTransient<IUserRepository, UserRepository>()
                 .AddTransient<IPostRepository, PostRepository>()
 				.AddTransient<IRoleRepository, RoleRepository>()
-			//.AddTransient<IStadiumRepository, StadiumRepository>()
+                .AddTransient<ICommentRepository, CommentRepository>()
+            //.AddTransient<IStadiumRepository, StadiumRepository>()
 
-			;
+            ;
         }
     }
 }
