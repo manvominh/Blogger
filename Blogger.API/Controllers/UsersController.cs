@@ -1,6 +1,7 @@
 ﻿using Blogger.Application.Dtos;
 using Blogger.Application.Interfaces.Services;
 using Blogger.Domain.Entities;
+using Blogger.Infrastructure.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -51,10 +52,21 @@ namespace Blogger.API.Controllers
             ModelState.AddModelError("LoginError", "Invalid username or password");
             return BadRequest(ModelState);
         }
-        [AllowAnonymous]
-        [HttpPost]
-        [Route("GetUserDetailsByEmail")]
-        public async Task<IActionResult> GetUserDetailsByEmail([FromBody] string email)
+		[AllowAnonymous]
+		[HttpGet("{userId}")]
+		public async Task<IActionResult> GetUser(int userId)
+		{
+			var result = await _userService.GetUserById(userId);
+			if (result != null)
+			{
+				return Ok(result);
+			}
+			ModelState.AddModelError("GetUserError", "Get User Details error.");
+			return BadRequest(ModelState);
+		}
+		[AllowAnonymous]
+        [HttpGet("GetUserDetailsByEmail/{email}")]
+        public async Task<IActionResult> GetUserDetailsByEmail(string email)
         {
             var result = await _userService.GetByEmail(email);
             if (result != null)
@@ -65,11 +77,10 @@ namespace Blogger.API.Controllers
             return BadRequest(ModelState);
         }
 		[Authorize]
-		[HttpPost]
-		[Route("UpdateUserByEmail")]
-		public async Task<IActionResult> UpdateUserByEmail([FromBody] UserRegistrationDto userRegistration)
+		[HttpPut]
+		public async Task<IActionResult> UpdateUser(UserRegistrationDto userRegistration)
 		{
-			var result = await _userService.UpdateUserByEmail(userRegistration);
+			var result = await _userService.UpdateUser(userRegistration);
 			if (result.IsUserUpdated)
 			{
 				return Ok(result);

@@ -24,5 +24,13 @@ namespace Blogger.Persistence.Repositories
                     .ThenInclude(userRole => userRole.Role)
                 .FirstOrDefaultAsync(x => x.Email == email);
         }
-    }
+
+		public async Task<User> GetById(int userId)
+		{
+			return await _userRepository.Entities
+				.Include(x => x.UserRoles)
+					.ThenInclude(userRole => userRole.Role)
+				.FirstOrDefaultAsync(x => x.Id == userId);
+		}
+	}
 }

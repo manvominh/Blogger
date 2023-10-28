@@ -42,7 +42,12 @@ namespace Blogger.Infrastructure.Services
             return await _userRepository.GetByEmail(email);
         }
 
-        public async Task<(bool IsLoginSuccess, UserSession? UserSession)> Login(LoginDto loginDto)
+		public async Task<User> GetUserById(int userId)
+		{
+			return await _userRepository.GetById(userId);
+		}
+
+		public async Task<(bool IsLoginSuccess, UserSession? UserSession)> Login(LoginDto loginDto)
         {
             if (string.IsNullOrEmpty(loginDto.Email) || string.IsNullOrEmpty(loginDto.Password))
             {
@@ -75,14 +80,14 @@ namespace Blogger.Infrastructure.Services
             return (true, "Success");
         }
 
-		public async Task<(bool IsUserUpdated, string Message)> UpdateUserByEmail(UserRegistrationDto userRegistration)
+		public async Task<(bool IsUserUpdated, string Message)> UpdateUser(UserRegistrationDto userRegistration)
 		{
 			var existedUser = await _userRepository.GetByEmail(userRegistration.Email);
 			if (existedUser == null)
 			{
 				return (false, "Email does not exist. Update Profile Error.");
 			}
-            existedUser.Password = userRegistration.Password;
+            existedUser.Password = BCrypt.Net.BCrypt.HashPassword(userRegistration.Password);
             existedUser.FirstName = userRegistration.FirstName;
             existedUser.LastName = userRegistration.LastName;
             existedUser.Gender = userRegistration.Gender;

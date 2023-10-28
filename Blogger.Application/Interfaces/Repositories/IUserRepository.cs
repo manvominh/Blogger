@@ -6,5 +6,6 @@ namespace Blogger.Application.Interfaces.Repositories
     {
         Task<IEnumerable<User>> GetAll();
         Task<User> GetByEmail(string email);
-    }
+		Task<User> GetById(int userId);
+	}
 }

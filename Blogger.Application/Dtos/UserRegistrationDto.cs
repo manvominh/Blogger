@@ -11,6 +11,7 @@ namespace Blogger.Application.Dtos
 {
     public class UserRegistrationDto : IMapFrom<User>
     {
+        public int Id { get; set; } = 0;
         [Required(ErrorMessage = "Please enter Email.")]
         [EmailAddress(ErrorMessage = "Invalid Email. Please re-enter.")]
         public string Email { get; set; }

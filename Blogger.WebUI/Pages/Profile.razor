@@ -105,7 +105,8 @@ else
 			{
 				var email = user.FindFirst(ClaimTypes.Email)?.Value;
 				var httpClient = _httpClientFactory.CreateClient("blog");
-				var response = await httpClient.PostAsJsonAsync<string>("/api/Users/GetUserDetailsByEmail", email);
+				var response = await httpClient.GetAsync($"/api/Users/GetUserDetailsByEmail/{email}");
+
 				if (response.StatusCode == HttpStatusCode.BadRequest)
 				{
 					var errors = await response.Content.ReadFromJsonAsync<Dictionary<string, List<string>>>();
@@ -153,8 +154,7 @@ else
 	private async Task UpdateUser()
 	{
 		var httpClient = _httpClientFactory.CreateClient("blog");
-		var response = await httpClient.PostAsJsonAsync<UserRegistrationDto>("/api/Users/UpdateUserByEmail", profile);
-
+		var response = await httpClient.PutAsJsonAsync<UserRegistrationDto>("/api/Users", profile);
 		if (response.StatusCode == HttpStatusCode.BadRequest)
 		{
 			var errors = await response.Content.ReadFromJsonAsync<Dictionary<string, List<string>>>();
