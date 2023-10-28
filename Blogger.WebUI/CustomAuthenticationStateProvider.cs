@@ -59,7 +59,7 @@ namespace Blogger.WebUI
             if (jwtToken == null) return null;
 
             var principle = _jwtAuthenticationManagerService.GetPrincipalFromToken(jwtToken);
-            if(principle == null) return null;
+            //if(principle == null) return null;
 			var email = principle.FindFirst(ClaimTypes.Email)?.Value;
 
 			var httpClient = _httpClientFactory.CreateClient("blog");

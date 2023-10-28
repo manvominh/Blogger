@@ -97,11 +97,12 @@
         }
         else if (response.IsSuccessStatusCode)
         {
-            var jwtToken = await response.Content.ReadAsStringAsync();
+            var jwtTokens = await response.Content.ReadFromJsonAsync<Tokens>();
 
-            if (jwtToken != null && !string.IsNullOrEmpty(jwtToken))
+            if (jwtTokens != null && !string.IsNullOrEmpty(jwtTokens.Access_Token) && !string.IsNullOrEmpty(jwtTokens.Refresh_Token))
             {
-                await _localStorageService.SetItemAsync("jwt_token", jwtToken);
+                await _localStorageService.SetItemAsync("jwt_token", jwtTokens.Access_Token);
+                await _localStorageService.SetItemAsync("refresh_token", jwtTokens.Refresh_Token);
                 var customAuthStateProvider = (CustomAuthenticationStateProvider)authStateProvider;
                 customAuthStateProvider.NotifyAuthState();
                 _toastService.ShowSuccess("Login successfully.");

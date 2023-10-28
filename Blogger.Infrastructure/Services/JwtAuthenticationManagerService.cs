@@ -6,7 +6,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Blogger.Infrastructure.Services
 {
@@ -15,11 +17,11 @@ namespace Blogger.Infrastructure.Services
         public const string JWT_SECURITY_KEY = "yPkCqn4kSWLtaJwXvN2jGzpQRyTZ3gdXkt7FeBJP";
         public const int JWT_TOKEN_VALIDITY_MINS = 20;
 
-        public Task<string> GenerateJwtToken(User user)
+        public Task<Tokens> GenerateJwtToken(User user)
         {
             ///* Validating the User Credentials */
             if (user == null)
-                return Task.FromResult<string>(string.Empty);
+                return Task.FromResult<Tokens>(null);
             List<string> roleNames = user.UserRoles.Select(s => s.Role.Name).ToList();
             /* Generating JWT Token */
             var tokenExpiryTimeStamp = DateTime.UtcNow.AddMinutes(JWT_TOKEN_VALIDITY_MINS);
@@ -50,9 +52,17 @@ namespace Blogger.Infrastructure.Services
             var jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
             var securityToken = jwtSecurityTokenHandler.CreateToken(securityTokenDescriptor);
             var token = jwtSecurityTokenHandler.WriteToken(securityToken);
-
-            /* return jwt token*/
-            return Task.FromResult<string>(token);
+            var refreshToken = GenerateRefreshToken();
+            return Task.FromResult(new Tokens { Access_Token = token, Refresh_Token = refreshToken });
+        }
+        public string GenerateRefreshToken()
+        {
+            var randomNumber = new byte[32];
+            using (var rng = RandomNumberGenerator.Create())
+            {
+                rng.GetBytes(randomNumber);
+                return Convert.ToBase64String(randomNumber);
+            }
         }
         public ClaimsPrincipal GetPrincipalFromToken(string token)
         {
@@ -64,16 +74,17 @@ namespace Blogger.Infrastructure.Services
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = new SymmetricSecurityKey(key),
                     ValidateIssuer = false,
-                    ValidateAudience = false
+                    ValidateAudience = false,
+                    ValidateLifetime = false,  // don't care about the token's expiration date
                 };
                 var tokenHandler = new JwtSecurityTokenHandler();
-				var jwt = tokenHandler.ReadJwtToken(token);
-				var expiredTime = jwt.Claims.First(c => c.Type == ClaimTypes.Expiration).Value;
-                if(DateTime.Parse(expiredTime) < DateTime.Now)
-                {
-                    return null;
-                }
-				SecurityToken securityToken;
+                var jwt = tokenHandler.ReadJwtToken(token);
+                //var expiredTime = jwt.Claims.First(c => c.Type == ClaimTypes.Expiration).Value;
+                //if (DateTime.Parse(expiredTime) < DateTime.Now)
+                //{
+                //    return null;
+                //}
+                SecurityToken securityToken;
                 //validating the token
                 var principle = tokenHandler.ValidateToken(token, tokenValidationParameters, out securityToken);
                 JwtSecurityToken jwtSecurityToken = securityToken as JwtSecurityToken;
@@ -91,15 +102,6 @@ namespace Blogger.Infrastructure.Services
                 return null;
             }
 			
-		}
-		public static long GetTokenExpirationTime(string token)
-		{
-			var handler = new JwtSecurityTokenHandler();
-			var jwtSecurityToken = handler.ReadJwtToken(token);
-			var tokenExp = jwtSecurityToken.Claims.First(claim => claim.Type.Equals("exp")).Value;
-			var ticks = long.Parse(tokenExp);
-			return ticks;
-		}
-
+		}   		
 	}
 }

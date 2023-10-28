@@ -12,6 +12,7 @@ namespace Blogger.Domain.Entities
         public string Gender { get; set; }
         public DateTime? DateOfBirth { get; set; }
         public string? Address { get; set; }
+        //public string RefreshToken { get; set; }
         public bool IsDeleted { get; set; }
         public List<Comment> Comments { get; set; }
         public List<Post> Posts { get; set; }

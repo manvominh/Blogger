@@ -14,6 +14,6 @@ namespace Blogger.Application.Interfaces.Services
 
         bool CheckUserUniqueEmail(string email);
 
-        Task<(bool IsLoginSuccess, string JwtToken)> Login(LoginDto loginDto);
+        Task<(bool IsLoginSuccess, Tokens JwtTokens)> Login(LoginDto loginDto);
     }
 }

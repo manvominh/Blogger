@@ -6,7 +6,7 @@ namespace Blogger.Application.Interfaces.Services
 {
     public interface IJwtAuthenticationManagerService
     {
-        Task<string> GenerateJwtToken(User user);
+        Task<Tokens> GenerateJwtToken(User user);
         ClaimsPrincipal GetPrincipalFromToken(string token);
     }
 }

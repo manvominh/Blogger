@@ -12,5 +12,6 @@ namespace Blogger.Application.Dtos
         public string LastName { get; set; }
         public DateTime Birthday { get; set; }
         public string Address { get; set; }
+        //public string RefreshToken { get; set; }
     }
 }

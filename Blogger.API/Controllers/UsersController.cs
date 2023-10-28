@@ -47,7 +47,7 @@ namespace Blogger.API.Controllers
             var result = await _userService.Login(loginDto);
             if (result.IsLoginSuccess)
             {
-                return Ok(result.JwtToken);
+                return Ok(result.JwtTokens);
             }
             ModelState.AddModelError("LoginError", "Invalid username or password");
             return BadRequest(ModelState);
