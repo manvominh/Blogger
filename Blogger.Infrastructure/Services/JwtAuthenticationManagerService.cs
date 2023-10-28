@@ -15,16 +15,16 @@ namespace Blogger.Infrastructure.Services
         public const string JWT_SECURITY_KEY = "yPkCqn4kSWLtaJwXvN2jGzpQRyTZ3gdXkt7FeBJP";
         public const int JWT_TOKEN_VALIDITY_MINS = 20;
 
-        public Task<UserSession?> GenerateJwtToken(User user)
+        public Task<string> GenerateJwtToken(User user)
         {
             ///* Validating the User Credentials */
             if (user == null)
-                return Task.FromResult<UserSession?>(null);
+                return Task.FromResult<string>(string.Empty);
             List<string> roleNames = user.UserRoles.Select(s => s.Role.Name).ToList();
             /* Generating JWT Token */
-            var tokenExpiryTimeStamp = DateTime.Now.AddMinutes(JWT_TOKEN_VALIDITY_MINS);
+            var tokenExpiryTimeStamp = DateTime.UtcNow.AddMinutes(JWT_TOKEN_VALIDITY_MINS);
             var tokenKey = Encoding.ASCII.GetBytes(JWT_SECURITY_KEY);
-			var expiryTimeStamp = new Claim(ClaimTypes.Expiration, DateTime.Now.AddMinutes(JWT_TOKEN_VALIDITY_MINS).ToString());
+			var expiryTimeStamp = new Claim(ClaimTypes.Expiration, DateTime.UtcNow.AddMinutes(JWT_TOKEN_VALIDITY_MINS).ToString());
 
 			var claimEmailAddress = new Claim(ClaimTypes.Email, user.Email);
 			var claimNameIdentifier = new Claim(ClaimTypes.NameIdentifier, Convert.ToString(user.Id));
@@ -51,15 +51,8 @@ namespace Blogger.Infrastructure.Services
             var securityToken = jwtSecurityTokenHandler.CreateToken(securityTokenDescriptor);
             var token = jwtSecurityTokenHandler.WriteToken(securityToken);
 
-            /* Returning the User Session object */
-            var userSession = new UserSession
-            {
-                FullName = $"{user.FirstName} {user.LastName}",
-                RoleNames = roleNames,
-                Token = token,
-                ExpiresIn = (int)tokenExpiryTimeStamp.Subtract(DateTime.Now).TotalSeconds
-            };
-            return Task.FromResult<UserSession?>(userSession);
+            /* return jwt token*/
+            return Task.FromResult<string>(token);
         }
         public ClaimsPrincipal GetPrincipalFromToken(string token)
         {
@@ -108,16 +101,5 @@ namespace Blogger.Infrastructure.Services
 			return ticks;
 		}
 
-		public static bool CheckTokenIsValid(string token)
-		{
-			var tokenTicks = GetTokenExpirationTime(token);
-			var tokenDate = DateTimeOffset.FromUnixTimeSeconds(tokenTicks).UtcDateTime;
-
-			var now = DateTime.Now.ToUniversalTime();
-
-			var valid = tokenDate >= now;
-
-			return valid;
-		}
 	}
 }

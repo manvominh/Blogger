@@ -36,7 +36,7 @@ namespace Blogger.WebUI
                 var claimNameIdentifier = new Claim(ClaimTypes.NameIdentifier, Convert.ToString(user.Id));
                 var claimFirstName = new Claim("FirstName", user.FirstName);
                 var claimLastName = new Claim("LastName", user.LastName);
-                var expiryTimeStamp = new Claim(ClaimTypes.Expiration, DateTime.Now.AddMinutes(20).ToString());
+                var expiryTimeStamp = new Claim(ClaimTypes.Expiration, DateTime.UtcNow.AddMinutes(20).ToString());
 				//create claimsIdentity
 				var claimsIdentity = new ClaimsIdentity(new[] { claimEmailAddress, claimNameIdentifier, claimFirstName, claimLastName, expiryTimeStamp }, "jwtAuth");
 				foreach (var role in user.UserRoles)

@@ -47,7 +47,7 @@ namespace Blogger.Infrastructure.Services
 			return await _userRepository.GetById(userId);
 		}
 
-		public async Task<(bool IsLoginSuccess, UserSession? UserSession)> Login(LoginDto loginDto)
+		public async Task<(bool IsLoginSuccess, string JwtToken)> Login(LoginDto loginDto)
         {
             if (string.IsNullOrEmpty(loginDto.Email) || string.IsNullOrEmpty(loginDto.Password))
             {
@@ -61,9 +61,9 @@ namespace Blogger.Infrastructure.Services
             bool validPassword = PasswordVerification(loginDto.Password, user.Password);
             if (!validPassword) { return (false, null); }
 
-            var userSession = await _jwtAuthenticationManagerService.GenerateJwtToken(user);
+            var jwtToken = await _jwtAuthenticationManagerService.GenerateJwtToken(user);
            
-            return (true, userSession);
+            return (true, jwtToken);
         }
 
         public async Task<(bool IsUserRegistered, string Message)> Register(UserRegistrationDto userRegistration)
