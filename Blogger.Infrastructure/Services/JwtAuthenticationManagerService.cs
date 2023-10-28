@@ -75,15 +75,15 @@ namespace Blogger.Infrastructure.Services
                     IssuerSigningKey = new SymmetricSecurityKey(key),
                     ValidateIssuer = false,
                     ValidateAudience = false,
-                    ValidateLifetime = false,  // don't care about the token's expiration date
+                    ValidateLifetime = true,  // don't care about the token's expiration date  if false
                 };
                 var tokenHandler = new JwtSecurityTokenHandler();
                 var jwt = tokenHandler.ReadJwtToken(token);
-                //var expiredTime = jwt.Claims.First(c => c.Type == ClaimTypes.Expiration).Value;
-                //if (DateTime.Parse(expiredTime) < DateTime.Now)
-                //{
-                //    return null;
-                //}
+                var expiredTime = jwt.Claims.First(c => c.Type == ClaimTypes.Expiration).Value;
+                if (DateTime.Parse(expiredTime) < DateTime.UtcNow)
+                {
+                    return null;
+                }
                 SecurityToken securityToken;
                 //validating the token
                 var principle = tokenHandler.ValidateToken(token, tokenValidationParameters, out securityToken);

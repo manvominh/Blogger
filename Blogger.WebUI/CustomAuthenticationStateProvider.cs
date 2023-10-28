@@ -56,10 +56,11 @@ namespace Blogger.WebUI
         {
             //pulling the token from localStorage
             var jwtToken = await _localStorageService.GetItemAsync<string>("jwt_token");
+
             if (jwtToken == null) return null;
 
             var principle = _jwtAuthenticationManagerService.GetPrincipalFromToken(jwtToken);
-            //if(principle == null) return null;
+            if(principle == null) return null;
 			var email = principle.FindFirst(ClaimTypes.Email)?.Value;
 
 			var httpClient = _httpClientFactory.CreateClient("blog");

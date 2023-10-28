@@ -1,4 +1,5 @@
 using Blazored.LocalStorage;
+using Blazored.Modal;
 using Blazored.Toast;
 using Blogger.Application.Extensions;
 using Blogger.Infrastructure.Extensions;
@@ -28,6 +29,7 @@ builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStat
 builder.Services.AddTransient<CustomAuthorizationHandler>();
 
 builder.Services.AddBlazoredToast();
+builder.Services.AddBlazoredModal();
 builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddAuthorizationCore();
 
