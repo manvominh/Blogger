@@ -3,7 +3,7 @@
 @inject IToastService _toastService
 
 <div>
-    <p>Are you sure you want to delete this commment?</p>
+    <p>@TextMessage</p>
 
     <button @onclick="Yes" class="btn btn-outline-danger">Yes</button>
     <button @onclick="No" class="btn btn-primary">No</button>
@@ -13,16 +13,9 @@
 
     [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; } = default!;
     [CascadingParameter] private IModalService Modal { get; set; } = default!;
-    [Parameter] public int CommentId { get; set; }
+    [Parameter] public string TextMessage { get; set; } = string.Empty;
     async Task Yes()
     {
-        // var confirmationModal = Modal.Show<Confirm>("Second Modal");
-        // var result = await confirmationModal.Result;
-
-        // if (result.Cancelled)
-        //     return;
-        //var abc = CommentId;
-
         await BlazoredModal.CloseAsync(ModalResult.Ok(true));
     }
 

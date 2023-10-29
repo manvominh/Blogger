@@ -203,20 +203,15 @@ else
             _navigationManager.NavigateTo("/login");
         }
     }
-    //void ShowModal() => Modal.Show<ConfirmDeleteComment>("Welcome to Blazored Modal");
-    protected async Task ShowModalConfirmDeletecomment(int commenId)
-    {
 
-        var parameters = new ModalParameters
-        {
-            { nameof(ConfirmDeleteComment.CommentId), commenId }
-        };
-        Modal.Show<ConfirmDeleteComment>("Confirm Delete Comment", parameters);
-
-    }
     protected async Task DeleteComment(int commenId)
     {
-        var confirm = Modal.Show<ConfirmDeleteComment>("Confirm Delete Comment");
+        var parameters = new ModalParameters
+        {
+            { nameof(ConfirmDelete.TextMessage), "Are you sure you want to delete this commment?" }
+        };
+
+        var confirm = Modal.Show<ConfirmDelete>("Confirm Delete Comment", parameters);
         var resultConfirm = (await confirm.Result)?.Data;
         if(resultConfirm != null) // handle press x button
         {
