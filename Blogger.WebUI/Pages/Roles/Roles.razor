@@ -1,0 +1,166 @@
+﻿@page "/roles"
+
+@using Blogger.Domain.Entities;
+@using Blogger.Application.Interfaces.Services;
+@using Microsoft.AspNetCore.Authorization;
+@using Blogger.WebUI.Pages.Common;
+
+@attribute [Authorize(Roles = "Administrator")]
+@inject IHttpClientFactory _httpClientFactory
+@inject IToastService _toastService
+
+<h3 style="color: green">
+    <a style="text-align:right;" class="text-primary" @onclick="(async () => await NewRole())"><i class="fa fa-plus" aria-hidden="true"></i> Add New Role</a>
+</h3>
+@if (roles == null)
+{
+    <DisplayLoadingIcon />
+}
+else
+{
+    <!--Table-->
+    <table class="table table-striped w-auto">
+
+        <!--Table head-->
+        <thead>
+            <tr>
+                <th>Role Name</th>
+                <th></th>
+                <th></th>
+            </tr>
+        </thead>
+        <!--Table head-->
+        <!--Table body-->
+        <tbody>
+            @foreach (var item in roles)
+            {
+                <tr class="table-info">
+                    <td>@item.Name</td>
+                    <td>
+                        <a style="text-align:right;" class="text-primary" @onclick="(async () => await UpdateRole(item.Id))"><i class="fas fa-edit fa-lg me-3 fa-fw" /></a>
+                    </td>
+                    <td>
+                        <a style="text-align:right;" class="text-danger" @onclick="(async () => await DeleteRole(item.Id, item.Name))"> <i class="fas fa-trash fa-lg me-3 fa-fw" /></a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+        <!--Table body-->
+
+    </table>
+    <!--Table-->
+}
+@code {
+    public IEnumerable<Role> roles { get; set; }
+    [Inject]
+    public IRoleService RoleService { get; set; }
+    [CascadingParameter] public IModalService Modal { get; set; } = default!;
+    private string APIErrorMessages;
+    protected override async Task OnInitializedAsync()
+    {
+        await GetRoles();
+    }
+    public async Task GetRoles()
+    {
+        var httpClient = _httpClientFactory.CreateClient("blog");
+        var response = await httpClient.GetAsync($"api/Roles/");
+
+        if (response.StatusCode == HttpStatusCode.BadRequest)
+        {
+            var errors = await response.Content.ReadFromJsonAsync<Dictionary<string, List<string>>>();
+            if (errors.Count > 0)
+            {
+                foreach (var item in errors)
+                {
+                    foreach (var errorMessage in item.Value)
+                    {
+                        APIErrorMessages = !string.IsNullOrEmpty(APIErrorMessages) ? $"{APIErrorMessages} | {errorMessage}" : $"{errorMessage}";
+                    }
+                }
+            }
+            _toastService.ShowError(APIErrorMessages);
+        }
+        else if (response.IsSuccessStatusCode)
+        {
+            roles = await response.Content.ReadFromJsonAsync<IEnumerable<Role>>();
+        }
+        else
+        {
+            _toastService.ShowError("Error on calling API");
+        }
+    }
+    protected async Task NewRole()
+    {
+        var parameters = new ModalParameters
+        {
+            { nameof(EditRole.roleId), 0 }
+        };
+        var options = new ModalOptions { Size = ModalSize.Large };
+        var confirm = Modal.Show<EditRole>("New Role", parameters, options);
+        var resultConfirm = (await confirm.Result)?.Data;
+        if (resultConfirm != null) // handle press x button
+        {
+            if (resultConfirm.ToString() == "success")
+            {
+                await GetRoles();
+                StateHasChanged();
+                _toastService.ShowSuccess("Add New Role successfully");
+            }
+            if (resultConfirm.ToString() == "failed")
+            {
+                _toastService.ShowInfo("Add New Role failed");
+            }
+        }
+    }
+    protected async Task UpdateRole(int roleId)
+    {
+        var parameters = new ModalParameters
+        {
+            { nameof(EditRole.roleId), roleId }
+        };
+        var options = new ModalOptions { Size = ModalSize.Large };
+        var confirm = Modal.Show<EditRole>("Edit Role", parameters, options);
+        var resultConfirm = (await confirm.Result)?.Data;
+        if (resultConfirm != null) // handle press x button
+        {
+            if (resultConfirm.ToString() == "success")
+            {
+                await GetRoles();
+                StateHasChanged();
+                _toastService.ShowSuccess("Update Role successfully");
+            }
+            if (resultConfirm.ToString() == "failed")
+            {
+                _toastService.ShowInfo("Update Role failed");
+            }
+        }
+    }
+    protected async Task DeleteRole(int roleId, string roleName)
+    {
+        var parameters = new ModalParameters
+        {
+            { nameof(ConfirmDelete.TextMessage), $"Are you sure you want to delete role: {roleName}?" }
+        };
+
+        var confirm = Modal.Show<ConfirmDelete>("Confirm Delete Role", parameters);
+        var resultConfirm = (await confirm.Result)?.Data;
+        if (resultConfirm != null) // handle press x button
+        {
+            bool isPressedOk;
+            Boolean.TryParse(resultConfirm.ToString(), out isPressedOk);
+            if (isPressedOk)
+            {
+                var httpClient = _httpClientFactory.CreateClient("blog");
+                var response = await httpClient.DeleteAsync($"/api/Roles/{roleId}");
+                if (response.IsSuccessStatusCode)
+                {
+                    _toastService.ShowSuccess("Delete Role successfully");
+                    await GetRoles();
+                    StateHasChanged();
+                }
+                else
+                    _toastService.ShowError("Delete Role failed");
+            }
+        }
+    }
+}

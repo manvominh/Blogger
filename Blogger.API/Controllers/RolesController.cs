@@ -1,5 +1,7 @@
-﻿using Blogger.Application.Interfaces.Services;
+﻿using Blogger.Application.Dtos;
+using Blogger.Application.Interfaces.Services;
 using Blogger.Domain.Entities;
+using Blogger.Infrastructure.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -31,6 +33,30 @@ namespace Blogger.API.Controllers
                 return Ok(result);
             }
             ModelState.AddModelError("RoleDetailsError", "Get Role Details error.");
+            return BadRequest(ModelState);
+        }
+        [Authorize]
+        [HttpPut]
+        public async Task<IActionResult> UpdateRole(RoleDto roleDto)
+        {
+            var result = await _roleService.SaveOrUpdateRole(roleDto);
+            if (result.IsSavedOrUpdatedRole)
+            {
+                return Ok(result);
+            }
+            ModelState.AddModelError("SavedOrUpdatedRoleError", "Saved Or Updated Role Error.");
+            return BadRequest(ModelState);
+        }
+        [Authorize]
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var result = await _roleService.DeleteRole(id);
+            if (result)
+            {
+                return Ok(result);
+            }
+            ModelState.AddModelError("DeleteRoleError", "Delete Role error.");
             return BadRequest(ModelState);
         }
     }
