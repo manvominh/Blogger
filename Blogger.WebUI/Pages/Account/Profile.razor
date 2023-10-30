@@ -3,6 +3,8 @@
 @using Blogger.Application.Dtos;
 @using Blogger.Domain.Entities;
 @using System.Security.Claims;
+@using Microsoft.AspNetCore.Authorization;
+@attribute [Authorize(Roles = "Administrator, User")]
 @inject IHttpClientFactory _httpClientFactory
 @inject NavigationManager _navigationManager
 @inject IToastService _toastService
@@ -23,8 +25,8 @@ else
 						</ol>
 					</nav>
 				</div>
-			</div>			
-			<EditForm EditContext="@editContext" OnValidSubmit="UpdateUser" @onreset="HandleReset">
+			</div>
+			<EditForm EditContext="@editContext" OnValidSubmit="UpdateProfile" @onreset="HandleReset">
 
 				<DataAnnotationsValidator />
 				@if (!string.IsNullOrEmpty(APIErrorMessages))
@@ -75,6 +77,7 @@ else
 						<ValidationMessage For="@(() => profile.DateOfBirth)" />
 					</div>
 					<div class="col-12 mb-3">
+						<label class="form-label">Address</label>
 						<InputTextArea @bind-Value="profile.Address" class="form-control" placeholder="Address" />
 						<ValidationMessage For="@(() => profile.Address)" />
 					</div>
@@ -148,13 +151,15 @@ else
 	async Task OnKeyPress(KeyboardEventArgs args)
 	{
 		if (args.Key == "Enter")
-			await UpdateUser();
+			await UpdateProfile();
 	}
 
-	private async Task UpdateUser()
+	private async Task UpdateProfile()
 	{
 		var httpClient = _httpClientFactory.CreateClient("blog");
-		var response = await httpClient.PutAsJsonAsync<UserRegistrationDto>("/api/Users", profile);
+		//var response = await httpClient.PutAsJsonAsync<UserRegistrationDto>("/api/Users", profile);
+		var response = await httpClient.PostAsJsonAsync<UserRegistrationDto>("/api/Users/Profile", profile);
+
 		if (response.StatusCode == HttpStatusCode.BadRequest)
 		{
 			var errors = await response.Content.ReadFromJsonAsync<Dictionary<string, List<string>>>();

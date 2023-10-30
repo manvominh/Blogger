@@ -8,12 +8,11 @@ namespace Blogger.Application.Interfaces.Services
         Task<IEnumerable<User>> GetAll();
 		Task<User> GetUserById(int userId);
 		Task<User> GetByEmail(string email);
-		Task<(bool IsUserUpdated, string Message)> UpdateUser(UserRegistrationDto userRegistration);
-
+		Task<(bool IsSavedOrUpdatedUser, string Message)> SaveOrUpdateUser(UserDto userDto);
+		Task<bool> DeleteUser(int userId);
+		Task<(bool IsUpdatedProfile, string Message)> UpdateProfile(UserRegistrationDto userRegistration);
 		Task<(bool IsUserRegistered, string Message)> Register(UserRegistrationDto userRegistration);
-
         bool CheckUserUniqueEmail(string email);
-
         Task<(bool IsLoginSuccess, Tokens JwtTokens)> Login(LoginDto loginDto);
     }
 }

@@ -3,7 +3,7 @@
 @using Blogger.Application.Interfaces.Services;
 @using Blogger.Domain.Entities;
 @using System.Security.Claims;
-@using Blogger.WebUI.Pages.Addon;
+@using Blogger.WebUI.Pages.Common;
 
 @inject IHttpClientFactory _httpClientFactory
 @inject NavigationManager _navigationManager
@@ -229,10 +229,6 @@ else
                 }
                 else
                     _toastService.ShowError("Delete Comment failed");
-            }
-            else
-            {
-                _toastService.ShowInfo("No Confirmed");
             }
         }
        

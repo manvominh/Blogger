@@ -78,14 +78,38 @@ namespace Blogger.API.Controllers
         }
 		[Authorize]
 		[HttpPut]
-		public async Task<IActionResult> UpdateUser(UserRegistrationDto userRegistration)
+		public async Task<IActionResult> UpdateUser(UserDto userDto)
 		{
-			var result = await _userService.UpdateUser(userRegistration);
-			if (result.IsUserUpdated)
+			var result = await _userService.SaveOrUpdateUser(userDto);
+			if (result.IsSavedOrUpdatedUser)
+			{
+				return Ok(result);
+			}
+			ModelState.AddModelError("SavedOrUpdatedUserError", "Saved Or Updated User Error.");
+			return BadRequest(ModelState);
+		}
+		[Authorize]
+		[HttpPost("Profile")]
+		public async Task<IActionResult> UpdateProfile(UserRegistrationDto userRegistration)
+		{
+			var result = await _userService.UpdateProfile(userRegistration);
+			if (result.IsUpdatedProfile)
 			{
 				return Ok(result);
 			}
 			ModelState.AddModelError("UpdateProfileError", "Update Profile Error.");
+			return BadRequest(ModelState);
+		}
+		[Authorize]
+		[HttpDelete("{id}")]
+		public async Task<IActionResult> Delete(int id)
+		{
+			var result = await _userService.DeleteUser(id);
+			if (result)
+			{
+				return Ok(result);
+			}
+			ModelState.AddModelError("DeleteUserError", "Delete User error.");
 			return BadRequest(ModelState);
 		}
 	}

@@ -6,6 +6,8 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel.Design;
+using System.Data;
 using System.Linq;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -84,7 +86,7 @@ namespace Blogger.Infrastructure.Services
             return (true, "Success");
         }
 
-		public async Task<(bool IsUserUpdated, string Message)> UpdateUser(UserRegistrationDto userRegistration)
+		public async Task<(bool IsUpdatedProfile, string Message)> UpdateProfile(UserRegistrationDto userRegistration)
 		{
 			var existedUser = await _userRepository.GetByEmail(userRegistration.Email);
 			if (existedUser == null)
@@ -99,6 +101,34 @@ namespace Blogger.Infrastructure.Services
             existedUser.Address = userRegistration.Address;
             await _unitOfWork.Repository<User>().UpdateAsync(existedUser);
 			await _unitOfWork.Save();
+			return (true, "Success");
+		}
+
+		public async Task<(bool IsSavedOrUpdatedUser, string Message)> SaveOrUpdateUser(UserDto userDto)
+		{
+			var user = new User
+			{
+                Id = userDto.Id,
+				Email = userDto.Email,
+				Password = BCrypt.Net.BCrypt.HashPassword(userDto.Password),
+				FirstName = userDto.FirstName,
+				LastName = userDto.LastName,
+				Gender = userDto.Gender,
+				DateOfBirth = userDto.DateOfBirth,
+				Address = userDto.Address
+			};
+            if (userDto.Id != 0)
+                await _unitOfWork.Repository<User>().UpdateAsync(user);
+            else
+                await _unitOfWork.Repository<User>().AddAsync(user);
+
+            await _unitOfWork.Save();
+			if (userDto.Id == 0)
+            {
+				await SaveDefaultRoleForNewUser(user);
+				await _unitOfWork.Save();
+			}
+				
 			return (true, "Success");
 		}
 
@@ -135,6 +165,15 @@ namespace Blogger.Infrastructure.Services
             await _unitOfWork.Repository<UserRole>().AddAsync(userRole);
             await _unitOfWork.Save();
         }
-        #endregion
-    }
+
+		public async Task<bool> DeleteUser(int userId)
+		{
+			var user = await _unitOfWork.Repository<User>().Entities.FirstOrDefaultAsync(x => x.Id == userId);
+			if (user == null) { return false; }
+			await _unitOfWork.Repository<User>().DeleteAsync(user);
+			await _unitOfWork.Save();
+			return true;
+		}
+		#endregion
+	}
 }

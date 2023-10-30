@@ -1,0 +1,227 @@
+﻿@using AutoMapper;
+@using Blogger.Application.Dtos;
+@using Blogger.Domain.Entities;
+@using System.Security.Claims;
+@using Microsoft.AspNetCore.Authorization;
+@attribute [Authorize(Roles = "Administrator")]
+@inject IHttpClientFactory _httpClientFactory
+@inject NavigationManager _navigationManager
+@inject IToastService _toastService
+@inject IMapper _mapper
+@if (userDto == null)
+{
+	<DisplayLoadingIcon />
+}
+else
+{		
+	<EditForm EditContext="@editContext" OnValidSubmit="UpdateUser" @onreset="HandleReset">
+
+		<DataAnnotationsValidator />
+		@if (!string.IsNullOrEmpty(APIErrorMessages))
+		{
+			<p class="text-danger">@APIErrorMessages</p>
+		}
+
+		<div class="row">
+			<div class="col-12 mb-3">
+				<label class="form-label">Email address</label>
+				<InputText @bind-Value="userDto.Email" class="form-control" placeholder="Your Email" />
+				<ValidationMessage For="@(() => userDto.Email)" />
+			</div>
+			<div class="col-12 mb-3">
+				<label class="form-label">Password</label>
+				<InputText @bind-Value="userDto.Password" class="form-control" type="password" placeholder="Password" />
+				<ValidationMessage For="@(() => userDto.Password)" />
+			</div>
+			<div class="col-12 mb-3">
+				<label class="form-label">First Name</label>
+				<InputText @bind-Value="userDto.FirstName" class="form-control" placeholder="First Name" />
+				<ValidationMessage For="@(() => userDto.FirstName)" />
+			</div>
+			<div class="col-12 mb-3">
+				<label class="form-label">Last Name</label>
+				<InputText @bind-Value="userDto.LastName" class="form-control" placeholder="Last Name" />
+				<ValidationMessage For="@(() => userDto.LastName)" />
+			</div>
+			<div class="col-12 mb-3">
+				<label class="form-label">Gender</label>
+				<InputSelect @bind-Value="userDto.Gender" class="form-control" placeholder="Gender">
+					<option value=""></option>
+					<option value="Mr">Mr</option>
+					<option value="Mrs">Mrs</option>
+					<option value="Miss">Miss</option>
+					<option value="Ms">Ms</option>
+				</InputSelect>
+				<ValidationMessage For="@(() => userDto.Gender)" />
+			</div>
+			<div class="col-6 mb-3">
+				<label class="form-label">Date Of Birth</label>
+				<InputDate @bind-Value="userDto.DateOfBirth" class="form-control" placeholder="Date of Birth" />
+				<ValidationMessage For="@(() => userDto.DateOfBirth)" />
+			</div>
+			<div class="col-12 mb-3">
+				<label class="form-label">Address</label>
+				<InputTextArea @bind-Value="userDto.Address" class="form-control" placeholder="Address" />
+				<ValidationMessage For="@(() => userDto.Address)" />
+			</div>
+			@* <div class="col-12 mb-3">
+				<label class="form-label">Role(s)</label>
+				@foreach (var role in roles)
+				{
+
+
+					@("<InputCheckbox type=\"checkbox\" />" + role.Name);
+
+						
+					
+				}
+				<ValidationMessage For="@(() => userDto.UserRoles)" />
+			</div> *@
+			<div class="col-12">
+				<input type="submit" value="@(userId != 0 ? "Update" : "Save") " class="btn btn-primary">
+				<input value="Cancel" @onclick="Close" class="btn btn-primary">
+			</div>
+		</div>
+	</EditForm>
+}
+@code {
+	[CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; } = default!;
+	[CascadingParameter] private IModalService Modal { get; set; } = default!;
+	[Parameter]
+	public int userId { get; set; }
+	UserDto userDto;
+	public IEnumerable<Role> roles { get; set; }
+	private EditContext editContext;
+	private string APIErrorMessages;	
+
+	[CascadingParameter]
+	private Task<AuthenticationState> authenticationState { get; set; }
+
+	protected async override Task OnInitializedAsync()
+	{				
+		var authState = await authenticationState;
+		var user = authState.User;
+
+		if (user.Identity.IsAuthenticated)
+		{
+			try
+			{				
+				if (userId != 0)
+				{					
+					var httpClient = _httpClientFactory.CreateClient("blog");
+					var response = await httpClient.GetAsync($"/api/Users/{userId}");
+
+					if (response.StatusCode == HttpStatusCode.BadRequest)
+					{
+						var errors = await response.Content.ReadFromJsonAsync<Dictionary<string, List<string>>>();
+						if (errors.Count > 0)
+						{
+							foreach (var item in errors)
+							{
+								foreach (var errorMessage in item.Value)
+								{
+									APIErrorMessages = !string.IsNullOrEmpty(APIErrorMessages) ? $"{APIErrorMessages} | {errorMessage}" : $"{errorMessage}";
+								}
+							}
+						}
+						_toastService.ShowError(APIErrorMessages);
+					}
+					else if (response.IsSuccessStatusCode)
+					{
+						var userInfo = await response.Content.ReadFromJsonAsync<User>();
+						userDto = _mapper.Map<UserDto>(userInfo);
+					}
+					else
+					{
+						_toastService.ShowError("Error on calling API");
+					}
+				}
+				else
+					userDto = new UserDto();
+
+				//await GetRoles();
+			}
+			catch (Exception ex)
+			{
+				APIErrorMessages = ex.Message;
+			}
+		}
+		else
+		{
+			_navigationManager.NavigateTo("/login");
+		}
+		editContext = new EditContext(userDto);
+	}
+	async Task OnKeyPress(KeyboardEventArgs args)
+	{
+		if (args.Key == "Enter")
+			await UpdateUser();
+	}
+	public async Task GetRoles()
+	{
+		var httpClient = _httpClientFactory.CreateClient("blog");
+		var response = await httpClient.GetAsync($"api/Roles/");
+
+		if (response.StatusCode == HttpStatusCode.BadRequest)
+		{
+			var errors = await response.Content.ReadFromJsonAsync<Dictionary<string, List<string>>>();
+			if (errors.Count > 0)
+			{
+				foreach (var item in errors)
+				{
+					foreach (var errorMessage in item.Value)
+					{
+						APIErrorMessages = !string.IsNullOrEmpty(APIErrorMessages) ? $"{APIErrorMessages} | {errorMessage}" : $"{errorMessage}";
+					}
+				}
+			}
+			_toastService.ShowError(APIErrorMessages);
+		}
+		else if (response.IsSuccessStatusCode)
+		{
+			roles = await response.Content.ReadFromJsonAsync<IEnumerable<Role>>();
+		}
+		else
+		{
+			_toastService.ShowError("Error on calling API");
+		}
+	}
+	private async Task UpdateUser()
+	{
+		var httpClient = _httpClientFactory.CreateClient("blog");
+		var response = await httpClient.PutAsJsonAsync<UserDto>("/api/Users", userDto);
+		if (response.StatusCode == HttpStatusCode.BadRequest)
+		{
+			var errors = await response.Content.ReadFromJsonAsync<Dictionary<string, List<string>>>();
+			if (errors.Count > 0)
+			{
+				foreach (var item in errors)
+				{
+					foreach (var errorMessage in item.Value)
+					{
+						APIErrorMessages = !string.IsNullOrEmpty(APIErrorMessages) ? $"{APIErrorMessages} | {errorMessage}" : $"{errorMessage}";
+					}
+				}
+			}
+			_toastService.ShowError(APIErrorMessages);
+		}
+		else if (response.IsSuccessStatusCode)
+		{
+			await BlazoredModal.CloseAsync(ModalResult.Ok("success"));
+		}
+		else
+		{
+			_toastService.ShowError("Error on calling API");
+			await BlazoredModal.CloseAsync(ModalResult.Ok("failed"));
+		}
+	}
+	private async Task Close()
+	{
+		await BlazoredModal.CloseAsync(ModalResult.Ok("close"));
+	}
+	private void HandleReset()
+	{
+		userDto = new UserDto();
+		editContext = new EditContext(userDto);
+	}
+}

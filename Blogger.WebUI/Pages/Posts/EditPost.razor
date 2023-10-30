@@ -1,4 +1,4 @@
-﻿@page "/newpost"
+﻿@page "/editpost/{postId:int}"
 
 @using AutoMapper;
 @using Blogger.Application.Dtos;
@@ -6,6 +6,7 @@
 @using Blogger.Domain.Entities;
 @using Blazored.TextEditor
 @using System.Security.Claims;
+@using Blogger.WebUI.Pages.Common;
 @inject IHttpClientFactory _httpClientFactory
 @inject IToastService _toastService
 @inject NavigationManager _navigationManager
@@ -22,12 +23,12 @@ else
 				<div class="col">
 					<nav aria-label="breadcrumb" class="bg-light rounded-3 p-3 mb-4">
 						<ol class="breadcrumb mb-0">
-							<li class="breadcrumb-item active" aria-current="page"><h3>New Post</h3></li>
+							<li class="breadcrumb-item active" aria-current="page"><h3>Edit Post</h3></li>
 						</ol>
 					</nav>
 				</div>
 			</div>
-			<EditForm EditContext="@editContext" OnValidSubmit="CreatePost">
+			<EditForm EditContext="@editContext" OnValidSubmit="UpdatePost">
 
 				<DataAnnotationsValidator />
 				@if (!string.IsNullOrEmpty(APIErrorMessages))
@@ -37,12 +38,12 @@ else
 
 				<div class="form-group">
 					<label class="form-label">Title</label>
-					<InputText @bind-Value="post.Title" class="form-control" placeholder="Enter Title" />
+					<InputText @bind-Value="post.Title" class="form-control" Placeholder="Enter Title" />
 					<ValidationMessage For="@(() => post.Title)" />
 				</div>
 				<div class="form-group">
 					<label class="form-label">Introduction</label>
-					<InputText @bind-Value="post.Introduction" class="form-control" placeholder="Enter Introduction" />
+					<InputText @bind-Value="post.Introduction" class="form-control" Placeholder="Enter Introduction" />
 					<ValidationMessage For="@(() => post.Introduction)" />
 				</div>
 				<div class="form-group" style="height:150px" placeholder="Enter Body Post">
@@ -84,10 +85,10 @@ else
 							</span>
 						</ToolbarContent>
 						<EditorContent>
-							@((MarkupString)post.BodyText)
+							
 						</EditorContent>
 					</BlazoredTextEditor>
-					@if (!string.IsNullOrEmpty(ErrorBodyText))
+					@if (!string.IsNullOrEmpty(APIErrorMessages))
 					{
 						<p class="text-danger">@ErrorBodyText</p>
 					}
@@ -99,7 +100,7 @@ else
 				</div>
 				<br />
 				<div class="form-group">
-					<input type="submit" value="Save Post" class="btn btn-primary">
+					<input type="submit" value="Update Post" class="btn btn-primary">
 				</div>
 
 			</EditForm>
@@ -117,41 +118,92 @@ else
 	[CascadingParameter]
 	private Task<AuthenticationState> authenticationState { get; set; }
 
-	PostDto post = new ();
+	PostDto post;
 	private EditContext editContext;
 	BlazoredTextEditor QuillHtml;
 	private string APIErrorMessages;
 
-
 	protected async override Task OnInitializedAsync()
 	{
-		editContext = new EditContext(post);
+
 		var authState = await authenticationState;
 		var user = authState.User;
 
 		if (user.Identity.IsAuthenticated)
 		{
 			UserId = int.Parse(user.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+			if (postId != 0)
+			{
+				var httpClient = _httpClientFactory.CreateClient("blog");
+				var response = await httpClient.GetAsync($"/api/Posts/{postId}");
+
+				if (response.StatusCode == HttpStatusCode.BadRequest)
+				{
+					var errors = await response.Content.ReadFromJsonAsync<Dictionary<string, List<string>>>();
+					if (errors.Count > 0)
+					{
+						foreach (var item in errors)
+						{
+							foreach (var errorMessage in item.Value)
+							{
+								APIErrorMessages = !string.IsNullOrEmpty(APIErrorMessages) ? $"{APIErrorMessages} | {errorMessage}" : $"{errorMessage}";
+							}
+						}
+					}
+					_toastService.ShowError(APIErrorMessages);
+				}
+				else if (response.IsSuccessStatusCode)
+				{
+					var postInfo = await response.Content.ReadFromJsonAsync<Post>();
+					if (postInfo.UserId != UserId) return;
+					post = _mapper.Map<PostDto>(postInfo);
+				}
+				else
+				{
+					_toastService.ShowError("Error on calling API");
+				}
+			}
 		}
 		else
 		{
 			_navigationManager.NavigateTo("/login");
+		}	
+		editContext = new EditContext(post);
+	}
+	protected async override Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (!firstRender) return;
+		bool loading = true;
+		while (loading)
+		{
+			try
+			{
+				if (!string.IsNullOrEmpty(post.BodyText))
+				{
+					await this.QuillHtml.LoadHTMLContent(post.BodyText);
+					loading = false;
+				}
+			}
+			catch
+			{
+				await Task.Delay(10);
+				loading = true;
+			}
 		}
-
 	}
 	async Task OnKeyPress(KeyboardEventArgs args)
 	{
 		if (args.Key == "Enter")
-			await CreatePost();
+			await ValidateBodyPost();
 	}
-	private async Task CreatePost()
+	private async Task UpdatePost()
 	{
 		if (!(await ValidateBodyPost())) return;
 
 		post.BodyText = BodyPost;
 		post.UserId = UserId;
 		var httpClient = _httpClientFactory.CreateClient("blog");
-		var response = await httpClient.PostAsJsonAsync<PostDto>("/api/Posts", post);
+		var response = await httpClient.PutAsJsonAsync<PostDto>("/api/Posts", post);
 		if (response.StatusCode == HttpStatusCode.BadRequest)
 		{
 			var errors = await response.Content.ReadFromJsonAsync<Dictionary<string, List<string>>>();
@@ -169,9 +221,7 @@ else
 		}
 		else if (response.IsSuccessStatusCode)
 		{
-			_toastService.ShowSuccess("Save Post successfully");
-			var postInfo = await response.Content.ReadFromJsonAsync<Post>();
-			_navigationManager.NavigateTo($"/editpost/{postInfo.Id}");
+			_toastService.ShowSuccess("Update Post successfully");
 		}
 		else
 		{
@@ -189,7 +239,7 @@ else
 		if (BodyPost.Replace(" ", string.Empty).Equals("<p></p>"))
 		{
 			ErrorBodyText = "Body Text can not be empty. Please enter Body Post.";
-			_toastService.ShowError("Body Text is not empty. Please enter Body Post.");
+			_toastService.ShowError("Body Text can not be empty. Please enter Body Post.");
 			return false;
 		}
 		ErrorBodyText = string.Empty;

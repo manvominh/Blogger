@@ -1,0 +1,175 @@
+﻿@page "/users"
+
+@using Blogger.Domain.Entities;
+@using Blogger.Application.Interfaces.Services;
+@using Microsoft.AspNetCore.Authorization;
+@using Blogger.WebUI.Pages.Common;
+@attribute [Authorize(Roles = "Administrator")]
+@inject IHttpClientFactory _httpClientFactory
+@inject IToastService _toastService
+
+<h3 style="color: green">
+    <a style="text-align:right;" class="text-primary" @onclick="(async () => await NewUser())"><i class="fa fa-plus" aria-hidden="true">Add New User</i> </a>
+</h3>
+@if (users == null)
+{
+    <DisplayLoadingIcon />
+}
+else
+{
+    <!--Table-->
+    <table class="table table-striped w-auto">
+
+        <!--Table head-->
+        <thead>
+            <tr>
+                <th>Email</th>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Gender</th>
+                <th>Date of Birth</th>
+                <th>Address</th>
+                <th>Status</th>
+                <th></th>
+                <th></th>
+            </tr>
+        </thead>
+        <!--Table head-->
+        <!--Table body-->
+        <tbody>
+            @foreach (var item in users)
+            {
+                <tr class="table-info">
+                    <td>@item.Email</td>
+                    <td>@item.FirstName</td>
+                    <td>@item.LastName</td>
+                    <td>@item.Gender</td>
+                    <td>@item.DateOfBirth.Value.ToString("dd/MM/yyyy")</td>
+                    <td>@item.Address</td>
+                    <td>@(item.IsDeleted ? "InActive" : "Active")</td>
+                    <td>
+                        <a style="text-align:right;" class="text-primary" @onclick="(async () => await UpdateUser(item.Id))"><i class="fas fa-edit fa-lg me-3 fa-fw" /></a>
+                    </td>
+                    <td>
+                        <a style="text-align:right;" class="text-danger" @onclick="(async () => await DeleteUser(item.Id, item.FirstName, item.LastName))"> <i class="fas fa-trash fa-lg me-3 fa-fw" /></a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+        <!--Table body-->
+
+    </table>
+    <!--Table-->
+}
+@code {
+    public IEnumerable<User> users { get; set; }
+    [Inject]
+    public IUserService UserService { get; set; }
+    [CascadingParameter] public IModalService Modal { get; set; } = default!;
+    private string APIErrorMessages;
+    protected override async Task OnInitializedAsync()
+    {
+        await GetUsers();
+    }
+    public async Task GetUsers()
+    {
+        var httpClient = _httpClientFactory.CreateClient("blog");
+        var response = await httpClient.GetAsync($"api/Users/");
+
+        if (response.StatusCode == HttpStatusCode.BadRequest)
+        {
+            var errors = await response.Content.ReadFromJsonAsync<Dictionary<string, List<string>>>();
+            if (errors.Count > 0)
+            {
+                foreach (var item in errors)
+                {
+                    foreach (var errorMessage in item.Value)
+                    {
+                        APIErrorMessages = !string.IsNullOrEmpty(APIErrorMessages) ? $"{APIErrorMessages} | {errorMessage}" : $"{errorMessage}";
+                    }
+                }
+            }
+            _toastService.ShowError(APIErrorMessages);
+        }
+        else if (response.IsSuccessStatusCode)
+        {
+            users = await response.Content.ReadFromJsonAsync<IEnumerable<User>>();
+        }
+        else
+        {
+            _toastService.ShowError("Error on calling API");
+        }
+    }
+    protected async Task NewUser()
+    {
+        var parameters = new ModalParameters
+        {
+            { nameof(EditUser.userId), 0 }
+        };
+        var options = new ModalOptions { Size = ModalSize.Large };
+        var confirm = Modal.Show<EditUser>("New User", parameters, options);
+        var resultConfirm = (await confirm.Result)?.Data;
+        if (resultConfirm != null) // handle press x button
+        {
+            if (resultConfirm.ToString() == "success")
+            {
+                await GetUsers();
+                StateHasChanged();
+                _toastService.ShowSuccess("Add New User successfully");
+            }
+            if (resultConfirm.ToString() == "failed")
+            {
+                _toastService.ShowInfo("Add New User failed");
+            }
+        }
+    }
+    protected async Task UpdateUser(int userId)
+    {
+        var parameters = new ModalParameters
+        {
+            { nameof(EditUser.userId), userId }
+        };
+        var options = new ModalOptions { Size = ModalSize.Large };
+        var confirm = Modal.Show<EditUser>("Edit User", parameters, options);
+        var resultConfirm = (await confirm.Result)?.Data;
+        if (resultConfirm != null) // handle press x button
+        {
+            if (resultConfirm.ToString() == "success")
+            {
+                _toastService.ShowSuccess("Update User successfully");
+            }
+            if (resultConfirm.ToString() == "failed")
+            {
+                _toastService.ShowInfo("Update User failed");
+            }
+        }
+    }
+    protected async Task DeleteUser(int userId, string firstName, string lastName)
+    {
+        var parameters = new ModalParameters
+        {
+            { nameof(ConfirmDelete.TextMessage), $"Are you sure you want to delete user: {firstName} {lastName}?" }
+        };
+
+        var confirm = Modal.Show<ConfirmDelete>("Confirm Delete User", parameters);
+        var resultConfirm = (await confirm.Result)?.Data;
+        if (resultConfirm != null) // handle press x button
+        {
+            bool isPressedOk;
+            Boolean.TryParse(resultConfirm.ToString(), out isPressedOk);
+            if (isPressedOk)
+            {
+                var httpClient = _httpClientFactory.CreateClient("blog");
+                var response = await httpClient.DeleteAsync($"/api/Users/{userId}");
+                if (response.IsSuccessStatusCode)
+                {
+                    _toastService.ShowSuccess("Delete User successfully");
+                    await GetUsers();
+                    StateHasChanged();
+                }
+                else
+                    _toastService.ShowError("Delete User failed");
+            }
+        }
+    }
+}
