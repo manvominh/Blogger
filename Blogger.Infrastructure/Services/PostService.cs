@@ -42,7 +42,9 @@ namespace Blogger.Infrastructure.Services
                 Title = postDto.Title,
                 Introduction = postDto.Introduction,
                 BodyText = postDto.BodyText,
-                IsPublished = postDto.IsPublished,
+				Image = postDto.Image,
+			    ImageDataUrl = postDto.ImageDataUrl,
+			    IsPublished = postDto.IsPublished,
                 UserId = postDto.UserId,
                 CreatedDate = DateTime.UtcNow,
             };
@@ -57,6 +59,8 @@ namespace Blogger.Infrastructure.Services
             post.Title = postDto.Title;
             post.Introduction = postDto.Introduction;
             post.BodyText = postDto.BodyText;
+            post.Image = postDto.Image;
+            post.ImageDataUrl = postDto.ImageDataUrl;
             post.IsPublished = postDto.IsPublished;
             post.UserId = postDto.UserId;
 			

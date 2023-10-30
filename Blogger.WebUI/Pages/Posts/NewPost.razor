@@ -8,6 +8,7 @@
 @using System.Security.Claims;
 @using Blogger.WebUI.Pages.Common;
 @using Microsoft.AspNetCore.Authorization;
+
 @attribute [Authorize(Roles = "Administrator, User")]
 @inject IHttpClientFactory _httpClientFactory
 @inject IToastService _toastService
@@ -47,6 +48,10 @@ else
 					<label class="form-label">Introduction</label>
 					<InputText @bind-Value="post.Introduction" class="form-control" placeholder="Enter Introduction" />
 					<ValidationMessage For="@(() => post.Introduction)" />
+				</div>
+				<div class="form-group">
+					<label class="form-label">Image</label>
+					<img src="@post.ImageDataUrl" style="width: 250px; height: 150px;"> <InputFile OnChange="@OnInputFileChanged"></InputFile>
 				</div>
 				<div class="form-group" style="height:150px" placeholder="Enter Body Post">
 					<label>Body Post</label>
@@ -125,7 +130,6 @@ else
 	BlazoredTextEditor QuillHtml;
 	private string APIErrorMessages;
 
-
 	protected async override Task OnInitializedAsync()
 	{
 		editContext = new EditContext(post);
@@ -146,6 +150,18 @@ else
 	{
 		if (args.Key == "Enter")
 			await CreatePost();
+	}
+	private async Task OnInputFileChanged(InputFileChangeEventArgs inputFileChangeEvent)
+	{
+		//get the file
+		var file = inputFileChangeEvent.File;
+
+		//read that file in a byte array
+		var buffer = new byte[file.Size];
+		await file.OpenReadStream(1512000).ReadAsync(buffer);
+
+		//convert byte array to base 64 string
+		post.ImageDataUrl = $"data:image/jpg;base64,{Convert.ToBase64String(buffer)}";
 	}
 	private async Task CreatePost()
 	{
@@ -172,6 +188,7 @@ else
 		}
 		else if (response.IsSuccessStatusCode)
 		{
+
 			_toastService.ShowSuccess("Save Post successfully");
 			var postInfo = await response.Content.ReadFromJsonAsync<Post>();
 			_navigationManager.NavigateTo($"/editpost/{postInfo.Id}");

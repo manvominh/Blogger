@@ -9,7 +9,8 @@ namespace Blogger.Domain.Entities
         public string Introduction { get; set; }
         public string BodyText { get; set; }
         public string? Image { get; set; }
-        public bool IsPublished { get; set; }
+		public string ImageDataUrl { get; set; }
+		public bool IsPublished { get; set; }
         public DateTime? PublishedDate { get; set; }
         public int UserId { get; set; }
         public List<Comment> Comments { get; set; }

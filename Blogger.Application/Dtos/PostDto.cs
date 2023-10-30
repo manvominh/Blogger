@@ -15,6 +15,7 @@ namespace Blogger.Application.Dtos
 		//[Required]
 		public string BodyText { get; set; }
 		public string? Image { get; set; }
+		public string ImageDataUrl { get; set; }
 		public bool IsPublished { get; set; }
 		public DateTime? PublishedDate { get; set; }
 		public int UserId { get; set; }

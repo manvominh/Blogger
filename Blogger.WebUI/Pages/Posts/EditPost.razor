@@ -46,6 +46,10 @@ else
 					<InputText @bind-Value="post.Introduction" class="form-control" Placeholder="Enter Introduction" />
 					<ValidationMessage For="@(() => post.Introduction)" />
 				</div>
+				<div class="form-group">
+					<label class="form-label">Image</label>&nbsp;
+					<img src="@post.ImageDataUrl" style="width: 250px; height: 150px;">&nbsp;&nbsp;<InputFile OnChange="@OnInputFileChanged"></InputFile>
+				</div>
 				<div class="form-group" style="height:150px" placeholder="Enter Body Post">
 					<label>Body Post</label>
 					<BlazoredTextEditor @ref="@QuillHtml">
@@ -195,6 +199,18 @@ else
 	{
 		if (args.Key == "Enter")
 			await ValidateBodyPost();
+	}
+	private async Task OnInputFileChanged(InputFileChangeEventArgs inputFileChangeEvent)
+	{
+		//get the file
+		var file = inputFileChangeEvent.File;
+
+		//read that file in a byte array
+		var buffer = new byte[file.Size];
+		await file.OpenReadStream(1512000).ReadAsync(buffer);
+
+		//convert byte array to base 64 string
+		post.ImageDataUrl = $"data:image/jpg;base64,{Convert.ToBase64String(buffer)}";
 	}
 	private async Task UpdatePost()
 	{
