@@ -14,9 +14,11 @@ namespace Blogger.Application.Dtos
         public int Id { get; set; } = 0;
         [Required(ErrorMessage = "Please enter Email.")]
         [EmailAddress(ErrorMessage = "Invalid Email. Please re-enter.")]
-        public string Email { get; set; }
+		[MaxLength(100, ErrorMessage = "Email cannot be longer than 100 characters.")]
+		public string Email { get; set; }
         [Required(ErrorMessage = "Please enter Password.")]
-        [MinLength(4, ErrorMessage = "Password is not enough length. Please re-enter.")]
+		[MaxLength(100, ErrorMessage = "Password cannot be longer than 100 characters.")]
+		[MinLength(6, ErrorMessage = "Password is not enough length. Please re-enter.")]
         public string Password { get; set; }
         [Required(ErrorMessage = "Please enter Password.")]
         [Compare("Password", ErrorMessage = "Confirm password doesn't match, Type again !")]
@@ -24,10 +26,12 @@ namespace Blogger.Application.Dtos
         public string ConfirmPassword { get; set; }
         [Required(ErrorMessage = "Please enter First Name.")]
         [Display(Name = "First Name")]
-        public string FirstName { get; set; }
+		[MaxLength(50, ErrorMessage = "First Name cannot be longer than 50 characters.")]
+		public string FirstName { get; set; }
         [Required(ErrorMessage = "Please enter Last Name.")]
         [Display(Name = "Last Name")]
-        public string LastName { get; set; }
+		[MaxLength(10, ErrorMessage = "Gender cannot be longer than 10 characters.")]
+		public string LastName { get; set; }
 
         [Required(ErrorMessage = "Please choose Gender.")]
         public string Gender { get; set; }

@@ -36,7 +36,7 @@ else
 		</div>
 		<div class="form-group">
 			<label class="form-label">Image</label>&nbsp;
-			<img src="@post.ImageDataUrl" style="width: 250px; height: 150px;">&nbsp;&nbsp;<InputFile OnChange="@OnInputFileChanged"></InputFile>
+			<img src="@post.ImageUrl" style="width: 250px; height: 150px;">&nbsp;&nbsp;<InputFile OnChange="@OnInputFileChanged"></InputFile>
 		</div>
 		<div class="form-group" style="height:150px" placeholder="Enter Body Post">
 			<label>Body Post</label>
@@ -195,7 +195,7 @@ else
 		await file.OpenReadStream(1512000).ReadAsync(buffer);
 
 		//convert byte array to base 64 string
-		post.ImageDataUrl = $"data:image/jpg;base64,{Convert.ToBase64String(buffer)}";
+		post.ImageUrl = $"data:image/jpg;base64,{Convert.ToBase64String(buffer)}";
 	}
 	private async Task CreateOrEdit()
 	{
@@ -249,7 +249,7 @@ else
 			_toastService.ShowError("Body Text is not empty. Please enter Body Post.");
 			return false;
 		}
-		if (string.IsNullOrEmpty(post.ImageDataUrl))
+		if (string.IsNullOrEmpty(post.ImageUrl))
 		{
 			_toastService.ShowError("Post must have an image. Please choose an image to upload.");
 			return false;

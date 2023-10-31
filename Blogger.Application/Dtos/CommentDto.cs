@@ -12,10 +12,8 @@ namespace Blogger.Application.Dtos
         public int PostId { get; set; }
         [Required]
         public int UserId { get; set; }
-        [Required]
-        public string CommentText { get; set; }
-        //public User User { get; set; }
-        //public Post Post { get; set; }
-        //public DateTime CreatedDate { get; set; }
+        [Required(ErrorMessage = "Please enter Comment.")]
+		[MaxLength(1000, ErrorMessage = "Title cannot be longer than 1000 characters.")]
+		public string CommentText { get; set; }
     }
 }

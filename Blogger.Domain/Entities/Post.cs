@@ -1,15 +1,19 @@
 ﻿using Blogger.Domain.Common;
+using System.ComponentModel.DataAnnotations;
 
 namespace Blogger.Domain.Entities
 {
     public class Post : IEntity
     {
         public int Id { get; set; }
-        public string Title { get; set; }
-        public string Introduction { get; set; }
+		[Required]
+		[StringLength(100)]
+		public string Title { get; set; }
+		[Required]
+		[StringLength(200)]
+		public string Introduction { get; set; }
         public string BodyText { get; set; }
-        public string? Image { get; set; }
-		public string ImageDataUrl { get; set; }
+		public string ImageUrl { get; set; }
 		public bool IsPublished { get; set; }
         public DateTime? PublishedDate { get; set; }
         public int UserId { get; set; }
