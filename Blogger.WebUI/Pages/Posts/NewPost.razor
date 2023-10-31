@@ -52,6 +52,10 @@ else
 				<div class="form-group">
 					<label class="form-label">Image</label>
 					<img src="@post.ImageDataUrl" style="width: 250px; height: 150px;"> <InputFile OnChange="@OnInputFileChanged"></InputFile>
+					@if (!string.IsNullOrEmpty(ErrorImageUrl))
+					{
+						<p class="text-danger">@ErrorImageUrl</p>
+					}
 				</div>
 				<div class="form-group" style="height:150px" placeholder="Enter Body Post">
 					<label>Body Post</label>
@@ -120,6 +124,7 @@ else
 	public int postId { get; set; }
 	public string BodyPost { get; set; }
 	public string ErrorBodyText { get; set; }
+	public string ErrorImageUrl { get; set; }
 	public int UserId { get; set; }
 
 	[CascadingParameter]
@@ -165,7 +170,7 @@ else
 	}
 	private async Task CreatePost()
 	{
-		if (!(await ValidateBodyPost())) return;
+		if (!(await ValidatePost())) return;
 
 		post.BodyText = BodyPost;
 		post.UserId = UserId;
@@ -203,16 +208,24 @@ else
 		post = new PostDto();
 		editContext = new EditContext(post);
 	}
-	private async Task<bool> ValidateBodyPost()
+	private async Task<bool> ValidatePost()
 	{
 		BodyPost = await this.QuillHtml.GetHTML();
 		if (BodyPost.Replace(" ", string.Empty).Equals("<p></p>"))
 		{
-			ErrorBodyText = "Body Text can not be empty. Please enter Body Post.";
-			_toastService.ShowError("Body Text is not empty. Please enter Body Post.");
+			string msgErrorBody = "Body Text is not empty. Please enter Body Post.";
+			//_toastService.ShowError(msgErrorBody);
+			ErrorBodyText = msgErrorBody;
 			return false;
 		}
-		ErrorBodyText = string.Empty;
+		if (string.IsNullOrEmpty(post.ImageDataUrl))
+		{
+			string msgErrorImageUrl = "Post must have an image. Please choose an image to upload.";
+			//_toastService.ShowError(msgErrorImageUrl);
+			ErrorImageUrl = msgErrorImageUrl;
+			return false;
+		}
+		ErrorBodyText = ErrorImageUrl = string.Empty;
 		return true;
 	}
 }

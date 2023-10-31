@@ -1,4 +1,4 @@
-﻿@page "/createeditpost/{postId:int}"
+﻿@page "/createeditpost/{PostId:int}"
 
 @using AutoMapper;
 @using Blogger.Application.Dtos;
@@ -16,91 +16,94 @@
 }
 else
 {
-	<div>
-		<div class="container py-5">
-			<div class="row">
-				<div class="col">
-					<nav aria-label="breadcrumb" class="bg-light rounded-3 p-3 mb-4">
-						<ol class="breadcrumb mb-0">
-							<li class="breadcrumb-item active" aria-current="page"><h3>@(postId != 0 ? "Edit Post" : "New Post")</h3></li>
-						</ol>
-					</nav>
-				</div>
-			</div>
-			<EditForm EditContext="@editContext"  OnValidSubmit="CreateOrEdit" @onreset="HandleReset">
+	<EditForm EditContext="@editContext" OnValidSubmit="CreateOrEdit">
 
-				<DataAnnotationsValidator />
-				@if (!string.IsNullOrEmpty(APIErrorMessages))
-				{
-					<p class="text-danger">@APIErrorMessages</p>
-				}
-				
-				<div class="form-group">
-					<label class="form-label">Title</label>
-					<InputText @bind-Value="post.Title" class="form-control" Placeholder="Enter Title" />
-					<ValidationMessage For="@(() => post.Title)" />
-				</div>
-				<div class="form-group">
-					<label class="form-label">Introduction</label>
-					<InputText @bind-Value="post.Introduction" class="form-control" Placeholder="Enter Introduction" />
-					<ValidationMessage For="@(() => post.Introduction)" />
-				</div>
-				<div class="form-group">
-					<label for="message">Body Post</label>
-					<BlazoredTextEditor @ref="@QuillHtml">
-						<ToolbarContent>
-							<select class="ql-header">
-								<option selected=""></option>
-								<option value="1"></option>
-								<option value="2"></option>
-								<option value="3"></option>
-								<option value="4"></option>
-								<option value="5"></option>
-							</select>
-							<span class="ql-formats">
-								<button class="ql-bold"></button>
-								<button class="ql-italic"></button>
-								<button class="ql-underline"></button>
-								<button class="ql-strike"></button>
-							</span>
-							<span class="ql-formats">
-								<select class="ql-color"></select>
-								<select class="ql-background"></select>
-							</span>
-							<span class="ql-formats">
-								<button class="ql-list" value="ordered"></button>
-								<button class="ql-list" value="bullet"></button>
-							</span>
-							<span class="ql-formats">
-								<button class="ql-link"></button>
-							</span>
-						</ToolbarContent>
-						<EditorContent>
-							
-						</EditorContent>
-					</BlazoredTextEditor>
-				</div>
-				<br />
-				<div class="form-group">
-					<label class="form-label">Publish</label>
-					<InputCheckbox @bind-Value="post.IsPublished"  />
-				</div>
-				<br/>
-				<div class="form-group">
-					<input type="submit" value="@(postId != 0 ? "Update Post" : "Save Post")" class="btn btn-primary">
-				</div>
+		<DataAnnotationsValidator />
+		@if (!string.IsNullOrEmpty(APIErrorMessages))
+		{
+			<p class="text-danger">@APIErrorMessages</p>
+		}
 
-			</EditForm>
+		<div class="form-group">
+			<label class="form-label">Title</label>
+			<InputText @bind-Value="post.Title" class="form-control" Placeholder="Enter Title" />
+			<ValidationMessage For="@(() => post.Title)" />
 		</div>
-	</div>
+		<div class="form-group">
+			<label class="form-label">Introduction</label>
+			<InputText @bind-Value="post.Introduction" class="form-control" Placeholder="Enter Introduction" />
+			<ValidationMessage For="@(() => post.Introduction)" />
+		</div>
+		<div class="form-group">
+			<label class="form-label">Image</label>&nbsp;
+			<img src="@post.ImageDataUrl" style="width: 250px; height: 150px;">&nbsp;&nbsp;<InputFile OnChange="@OnInputFileChanged"></InputFile>
+		</div>
+		<div class="form-group" style="height:150px" placeholder="Enter Body Post">
+			<label>Body Post</label>
+			<BlazoredTextEditor @ref="@QuillHtml">
+				<ToolbarContent>
+					<select class="ql-header">
+						<option selected=""></option>
+						<option value="1"></option>
+						<option value="2"></option>
+						<option value="3"></option>
+						<option value="4"></option>
+						<option value="5"></option>
+					</select>
+					<span class="ql-formats">
+						<button class="ql-bold"></button>
+						<button class="ql-italic"></button>
+						<button class="ql-underline"></button>
+						<button class="ql-strike"></button>
+					</span>
+					<span class="ql-formats">
+						<select class="ql-color"></select>
+						<select class="ql-background"></select>
+					</span>
+					<span class="ql-formats">
+						<button class="ql-list" value="ordered"></button>
+						<button class="ql-list" value="bullet"></button>
+						<button class="ql-indent" value="-1"></button>
+						<button class="ql-indent" value="+1"></button>
+						<select class="ql-align">
+							<option selected=""></option>
+							<option value="center"></option>
+							<option value="right"></option>
+							<option value="justify"></option>
+						</select>
+					</span>
+					<span class="ql-formats">
+						<button class="ql-link"></button>
+					</span>
+				</ToolbarContent>
+				<EditorContent>
+
+				</EditorContent>
+			</BlazoredTextEditor>
+			@if (!string.IsNullOrEmpty(APIErrorMessages))
+			{
+				<p class="text-danger">@ErrorBodyText</p>
+			}
+		</div>
+		<br />
+		<div class="form-group" style="padding-top: 75px;">
+			<label class="form-label">Publish</label>
+			<InputCheckbox @bind-Value="post.IsPublished" />
+		</div>
+		<br />
+		<div class="form-group">
+			<input type="submit" value="@(PostId != 0 ? "Update" : "Save")" class="btn btn-primary">
+		</div>
+	</EditForm>
 }
 
 @code {
 	public BlazoredTextEditor QuillHtml { get; set; } = new BlazoredTextEditor();
-	
+
 	[Parameter]
-	public int postId { get; set; }
+	public int PostId { get; set; }
 	public string BodyPost { get; set; }
+	public string ErrorBodyText { get; set; }
 	public int UserId { get; set; }
 
 	[CascadingParameter]
@@ -119,34 +122,9 @@ else
 		if (user.Identity.IsAuthenticated)
 		{
 			UserId = int.Parse(user.FindFirst(ClaimTypes.NameIdentifier)?.Value);
-			if (postId != 0)
+			if (PostId != 0)
 			{
-				var httpClient = _httpClientFactory.CreateClient("blog");
-				var response = await httpClient.PostAsJsonAsync<string>("/api/Posts/PostDetails", postId.ToString());
-				if (response.StatusCode == HttpStatusCode.BadRequest)
-				{
-					var errors = await response.Content.ReadFromJsonAsync<Dictionary<string, List<string>>>();
-					if (errors.Count > 0)
-					{
-						foreach (var item in errors)
-						{
-							foreach (var errorMessage in item.Value)
-							{
-								APIErrorMessages = !string.IsNullOrEmpty(APIErrorMessages) ? $"{APIErrorMessages} | {errorMessage}" : $"{errorMessage}";
-							}
-						}
-					}
-					_toastService.ShowError(APIErrorMessages);
-				}
-				else if (response.IsSuccessStatusCode)
-				{
-					var postInfo = await response.Content.ReadFromJsonAsync<Post>();
-					post = _mapper.Map<PostDto>(postInfo);
-				}
-				else
-				{
-					_toastService.ShowError("Error on calling API");
-				}
+				await GetPost();
 			}
 			else
 				post = new();
@@ -177,17 +155,11 @@ else
 				loading = true;
 			}
 		}
-		
-		
 	}
-	private async Task CreateOrEdit()
+	private async Task GetPost()
 	{
-		if (!(await ValidateBodyPost())) return;
-
-		post.BodyText = await QuillHtml.GetHTML();
-		post.UserId = UserId;
 		var httpClient = _httpClientFactory.CreateClient("blog");
-		var response = await httpClient.PostAsJsonAsync<PostDto>("/api/Posts/SavePost", post);
+		var response = await httpClient.PostAsJsonAsync<string>("/api/Posts/PostDetails", PostId.ToString());
 		if (response.StatusCode == HttpStatusCode.BadRequest)
 		{
 			var errors = await response.Content.ReadFromJsonAsync<Dictionary<string, List<string>>>();
@@ -205,26 +177,81 @@ else
 		}
 		else if (response.IsSuccessStatusCode)
 		{
-			var successfulMessage = postId == 0 ? "Save Post successfully" : "Update Post successfully";
+			var postInfo = await response.Content.ReadFromJsonAsync<Post>();
+			post = _mapper.Map<PostDto>(postInfo);
+		}
+		else
+		{
+			_toastService.ShowError("Error on calling API");
+		}
+	}
+	private async Task OnInputFileChanged(InputFileChangeEventArgs inputFileChangeEvent)
+	{
+		//get the file
+		var file = inputFileChangeEvent.File;
+
+		//read that file in a byte array
+		var buffer = new byte[file.Size];
+		await file.OpenReadStream(1512000).ReadAsync(buffer);
+
+		//convert byte array to base 64 string
+		post.ImageDataUrl = $"data:image/jpg;base64,{Convert.ToBase64String(buffer)}";
+	}
+	private async Task CreateOrEdit()
+	{
+		if (!(await ValidatePost())) return;
+
+		post.BodyText = await QuillHtml.GetHTML();
+		post.UserId = UserId;
+		var httpClient = _httpClientFactory.CreateClient("blog");
+		HttpResponseMessage response;
+
+		if (PostId != 0)
+			response = await httpClient.PutAsJsonAsync<PostDto>("/api/Posts", post);
+		else
+			response = await httpClient.PostAsJsonAsync<PostDto>("/api/Posts", post);
+
+		if (response.StatusCode == HttpStatusCode.BadRequest)
+		{
+			var errors = await response.Content.ReadFromJsonAsync<Dictionary<string, List<string>>>();
+			if (errors.Count > 0)
+			{
+				foreach (var item in errors)
+				{
+					foreach (var errorMessage in item.Value)
+					{
+						APIErrorMessages = !string.IsNullOrEmpty(APIErrorMessages) ? $"{APIErrorMessages} | {errorMessage}" : $"{errorMessage}";
+					}
+				}
+			}
+			_toastService.ShowError(APIErrorMessages);
+		}
+		else if (response.IsSuccessStatusCode)
+		{
+			var successfulMessage = PostId == 0 ? "Save Post successfully" : "Update Post successfully";
 			_toastService.ShowSuccess(successfulMessage);
 		}
 		else
 		{
 			_toastService.ShowError("Error on calling API");
 		}
-		//_toastService.ShowInfo("button Create Or Edit Post is pressed.");
 	}
 	private void HandleReset()
 	{
 		post = new PostDto();
 		editContext = new EditContext(post);
 	}
-	private async Task<bool> ValidateBodyPost()
+	private async Task<bool> ValidatePost()
 	{
 		BodyPost = await this.QuillHtml.GetHTML();
 		if (BodyPost.Replace(" ", string.Empty).Equals("<p></p>"))
 		{
 			_toastService.ShowError("Body Text is not empty. Please enter Body Post.");
+			return false;
+		}
+		if (string.IsNullOrEmpty(post.ImageDataUrl))
+		{
+			_toastService.ShowError("Post must have an image. Please choose an image to upload.");
 			return false;
 		}
 		return true;
