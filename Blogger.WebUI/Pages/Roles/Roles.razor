@@ -7,16 +7,17 @@
 @attribute [Authorize(Roles = "Administrator")]
 @inject IHttpClientFactory _httpClientFactory
 @inject IToastService _toastService
+@inject NavigationManager _navigationManager
 
-<h3 style="color: green">
-    <a style="text-align:right;" class="text-primary" @onclick="(async () => await NewRole())"><i class="fa fa-plus" aria-hidden="true"></i> Add New Role</a>
-</h3>
 @if (roles == null)
 {
     <DisplayLoadingIcon />
 }
 else
 {
+    <h3 style="color: green">
+        <a style="text-align:right;" class="text-primary" @onclick="(async () => await NewRole())"><i class="fa fa-plus" aria-hidden="true"></i> Add New Role</a>
+    </h3>
     <!--Table-->
     <table class="table table-striped w-auto">
 
@@ -55,9 +56,23 @@ else
     public IRoleService RoleService { get; set; }
     [CascadingParameter] public IModalService Modal { get; set; } = default!;
     private string APIErrorMessages;
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationState { get; set; }
     protected override async Task OnInitializedAsync()
     {
-        await GetRoles();
+        var authState = await authenticationState;
+        var user = authState.User;
+        if (user.Identity.IsAuthenticated)
+        {
+            if (user.IsInRole("Administrator"))
+                await GetRoles();
+            else
+                _navigationManager.NavigateTo("/unauthorized");
+        }
+        else
+        {
+            _navigationManager.NavigateTo("/login");
+        }
     }
     public async Task GetRoles()
     {

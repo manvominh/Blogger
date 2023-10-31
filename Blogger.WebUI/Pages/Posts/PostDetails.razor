@@ -50,7 +50,7 @@ else
 
 
                 <div class="pt-5 comment-wrap">
-                        @if (!IsAuthenticed)
+                        @if (!IsAuthenticated)
                         {
                             <p class="text-warning">You have to <a href="/login" class="text-danger">log in</a> before you can comment.</p>
                         }
@@ -112,7 +112,7 @@ else
     public IPostService PostService { get; set; }
     [CascadingParameter]
     private Task<AuthenticationState> authenticationState { get; set; }
-    private bool IsAuthenticed{ get; set; }
+    private bool IsAuthenticated { get; set; }
     private int CurrentUserId { get; set; }
     public CommentDto commentModel = new CommentDto();
     private string APIErrorMessages;
@@ -124,7 +124,7 @@ else
         var user = authState.User;
         if (user.Identity.IsAuthenticated)
         {
-            IsAuthenticed = user.Identity.IsAuthenticated;
+            IsAuthenticated = user.Identity.IsAuthenticated;
             CurrentUserId = int.Parse(user.FindFirst(ClaimTypes.NameIdentifier)?.Value);
         }
 
@@ -165,7 +165,7 @@ else
     }
     public async Task AddComment()
     {
-        if(IsAuthenticed)
+        if(IsAuthenticated)
         {
             commentModel.PostId = postId;
             commentModel.UserId = CurrentUserId;
