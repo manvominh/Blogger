@@ -16,6 +16,7 @@ namespace Blogger.Persistence.Repositories
         {
             return await _postRepository.Entities
                 .Include(x => x.User)
+                .Where(x => x.IsPublished)
                 .ToListAsync();
         }
 

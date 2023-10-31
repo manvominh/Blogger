@@ -1,4 +1,5 @@
-﻿using Blogger.Application.Dtos;
+﻿using Blogger.Application.Common.Enums;
+using Blogger.Application.Dtos;
 using Blogger.Application.Interfaces.Repositories;
 using Blogger.Application.Interfaces.Services;
 using Blogger.Domain.Entities;
@@ -156,7 +157,7 @@ namespace Blogger.Infrastructure.Services
         }
         private async Task SaveDefaultRoleForNewUser(User user)
         {
-            var role = await _unitOfWork.Repository<Role>().Entities.FirstOrDefaultAsync(x => x.Id == 2);
+            var role = await _unitOfWork.Repository<Role>().Entities.FirstOrDefaultAsync(x => x.Id == (int)EnumRoles.User);
             var userRole = new UserRole
             {
                 UserId = user.Id,

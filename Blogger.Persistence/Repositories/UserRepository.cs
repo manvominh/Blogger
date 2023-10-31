@@ -22,7 +22,7 @@ namespace Blogger.Persistence.Repositories
             return await _userRepository.Entities
                 .Include(x => x.UserRoles)
                     .ThenInclude(userRole => userRole.Role)
-                .FirstOrDefaultAsync(x => x.Email == email);
+                .FirstOrDefaultAsync(x => x.Email == email && x.IsDeleted == false);
         }
 
 		public async Task<User> GetById(int userId)
@@ -30,7 +30,7 @@ namespace Blogger.Persistence.Repositories
 			return await _userRepository.Entities
 				.Include(x => x.UserRoles)
 					.ThenInclude(userRole => userRole.Role)
-				.FirstOrDefaultAsync(x => x.Id == userId);
+				.FirstOrDefaultAsync(x => x.Id == userId && x.IsDeleted == false);
 		}
 	}
 }

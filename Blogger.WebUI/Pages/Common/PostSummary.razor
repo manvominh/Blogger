@@ -11,7 +11,7 @@
 				@item.CreatedDate &nbsp;&nbsp;&nbsp;
 				@if (item.UserId == CurrentUserId)
 				{
-					<a href="/editpost/@item.Id">Edit Post</a>
+					<a href="/editpost/@item.Id" class="btn-success">Edit Post</a>
 				}
 			</span>
 			<h2><a href="/postdetails/@item.Id">@item.Title</a></h2>

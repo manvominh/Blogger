@@ -71,7 +71,8 @@ namespace Blogger.Persistence.Contexts
                 LastName ="admin",
                 Gender = "Mr",
                 DateOfBirth = DateTime.Now,
-                Address = "Google Inc."
+                Address = "Building Etown 1, 364 Cong Hoa Street, Ward 13, District Tan Binh, Ho Chi Minh City, Vietnam",
+                IsDeleted = false,
             });
             modelBuilder.Entity<User>().HasData(new User
             {
@@ -82,8 +83,9 @@ namespace Blogger.Persistence.Contexts
                 LastName = "user",
                 Gender = "Mr",
                 DateOfBirth = DateTime.Now,
-                Address = "Google Inc."
-            });
+                Address = "Building Etown 4, 364 Cong Hoa Street, Ward 13, District Tan Binh, Ho Chi Minh City, Vietnam",
+				IsDeleted = false,
+			});
 			// UserRole
 			//            modelBuilder.Entity<UserRole>().HasKey(userRole => new { userRole.UserId, userRole.RoleId });
 			modelBuilder.Entity<UserRole>()
