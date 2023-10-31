@@ -169,9 +169,11 @@ namespace Blogger.Infrastructure.Services
 
 		public async Task<bool> DeleteUser(int userId)
 		{
-			var user = await _unitOfWork.Repository<User>().Entities.FirstOrDefaultAsync(x => x.Id == userId);
+			var user = await _unitOfWork.Repository<User>().Entities.FirstOrDefaultAsync(x => x.Id == userId && x.IsDeleted == false);
 			if (user == null) { return false; }
-			await _unitOfWork.Repository<User>().DeleteAsync(user);
+            // just update IsDeleted = true;
+            user.IsDeleted = true;
+			await _unitOfWork.Repository<User>().UpdateAsync(user);
 			await _unitOfWork.Save();
 			return true;
 		}
