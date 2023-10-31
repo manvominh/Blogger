@@ -7,6 +7,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="wwwroot\js\aos.js" />
+    <Content Remove="wwwroot\js\bootstrap.bundle.min.js" />
+    <Content Remove="wwwroot\js\counter.js" />
+    <Content Remove="wwwroot\js\flatpickr.min.js" />
+    <Content Remove="wwwroot\js\glightbox.min.js" />
+    <Content Remove="wwwroot\js\navbar.js" />
+    <Content Remove="wwwroot\js\tiny-slider.js" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Blazored.LocalStorage" Version="4.4.0" />
     <PackageReference Include="Blazored.Modal" Version="7.1.0" />
     <PackageReference Include="Blazored.TextEditor" Version="1.1.0" />
