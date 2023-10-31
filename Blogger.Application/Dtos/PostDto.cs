@@ -11,7 +11,7 @@ namespace Blogger.Application.Dtos
 		[Required(ErrorMessage = "Please enter Title.")]
 		[MaxLength(100, ErrorMessage = "Title cannot be longer than 100 characters.")]
 		public string Title { get; set; }
-		[Required(ErrorMessage = "Please enter Title.")]
+		[Required(ErrorMessage = "Please enter Introduction.")]
 		[MaxLength(200, ErrorMessage = "Title cannot be longer than 200 characters.")]
 		public string Introduction { get; set; }
 		public string BodyText { get; set; }

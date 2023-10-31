@@ -26,7 +26,7 @@ else
 					</nav>
 				</div>
 			</div>
-			<EditForm EditContext="@editContext" OnValidSubmit="UpdateProfile" @onreset="HandleReset">
+			<EditForm Model="@profile" OnValidSubmit="UpdateProfile" @onreset="HandleReset">
 
 				<DataAnnotationsValidator />
 				@if (!string.IsNullOrEmpty(APIErrorMessages))
@@ -92,7 +92,6 @@ else
 }
 @code {
 	UserRegistrationDto profile;
-	private EditContext editContext;
 	private string APIErrorMessages;
 	[CascadingParameter]
 	private Task<AuthenticationState> authenticationState { get; set; }
@@ -146,7 +145,6 @@ else
 		{
 			_navigationManager.NavigateTo("/login");
 		}
-		editContext = new EditContext(profile);
 	}
 	async Task OnKeyPress(KeyboardEventArgs args)
 	{
@@ -187,6 +185,5 @@ else
 	private void HandleReset()
 	{
 		profile = new UserRegistrationDto();
-		editContext = new EditContext(profile);
 	}
 }

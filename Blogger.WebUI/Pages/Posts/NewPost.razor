@@ -30,7 +30,7 @@ else
 					</nav>
 				</div>
 			</div>
-			<EditForm EditContext="@editContext" OnValidSubmit="CreatePost">
+			<EditForm Model="@post" OnValidSubmit="CreatePost">
 
 				<DataAnnotationsValidator />
 				@if (!string.IsNullOrEmpty(APIErrorMessages))
@@ -130,13 +130,11 @@ else
 	private Task<AuthenticationState> authenticationState { get; set; }
 
 	PostDto post = new ();
-	private EditContext editContext;
 	BlazoredTextEditor QuillHtml;
 	private string APIErrorMessages;
 
 	protected async override Task OnInitializedAsync()
 	{
-		editContext = new EditContext(post);
 		var authState = await authenticationState;
 		var user = authState.User;
 
@@ -205,7 +203,6 @@ else
 	private void HandleReset()
 	{
 		post = new PostDto();
-		editContext = new EditContext(post);
 	}
 	private async Task<bool> ValidatePost()
 	{
@@ -217,6 +214,7 @@ else
 			ErrorBodyText = msgErrorBody;
 			return false;
 		}
+		ErrorBodyText = string.Empty;
 		if (string.IsNullOrEmpty(post.ImageUrl))
 		{
 			string msgErrorImageUrl = "Post must have an image. Please choose an image to upload.";
@@ -224,7 +222,7 @@ else
 			ErrorImageUrl = msgErrorImageUrl;
 			return false;
 		}
-		ErrorBodyText = ErrorImageUrl = string.Empty;
+		ErrorImageUrl = string.Empty;
 		return true;
 	}
 }
