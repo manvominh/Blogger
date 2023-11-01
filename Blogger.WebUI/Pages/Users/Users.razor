@@ -1,6 +1,6 @@
 ﻿@page "/users"
 
-@using Blogger.Domain.Entities;
+@using Blogger.Application.Dtos;
 @using Blogger.Application.Interfaces.Services;
 @using Blogger.WebUI.Pages.Common;
 @attribute [Authorize(Roles = "Administrator")]
@@ -62,7 +62,7 @@ else
     <!--Table-->
 }
 @code {
-    public IEnumerable<User> users { get; set; }
+    public IEnumerable<UserDto> users { get; set; }
     [Inject]
     public IUserService UserService { get; set; }
     [CascadingParameter] public IModalService Modal { get; set; } = default!;
@@ -107,7 +107,7 @@ else
         }
         else if (response.IsSuccessStatusCode)
         {
-            users = await response.Content.ReadFromJsonAsync<IEnumerable<User>>();
+            users = await response.Content.ReadFromJsonAsync<IEnumerable<UserDto>>();
         }
         else
         {
@@ -150,6 +150,8 @@ else
         {
             if (resultConfirm.ToString() == "success")
             {
+                await GetUsers();
+                StateHasChanged();
                 _toastService.ShowSuccess("Update User successfully");
             }
             if (resultConfirm.ToString() == "failed")
@@ -177,9 +179,9 @@ else
                 var response = await httpClient.DeleteAsync($"/api/Users/{userId}");
                 if (response.IsSuccessStatusCode)
                 {
-                    _toastService.ShowSuccess("Delete User successfully");
                     await GetUsers();
                     StateHasChanged();
+                    _toastService.ShowSuccess("Delete User successfully");
                 }
                 else
                     _toastService.ShowError("Delete User failed");

@@ -1,5 +1,6 @@
 ﻿@page "/myposts/{userId:int}"
-@using Blogger.Domain.Entities;
+
+@using Blogger.Application.Dtos;
 @using Blogger.Application.Interfaces.Services;
 @using System.Security.Claims;
 @using Blogger.WebUI.Pages.Common;
@@ -38,7 +39,7 @@ else
 @code {
 	[Parameter]
 	public int userId { get; set; }
-	public IEnumerable<Post> Posts { get; set; }
+	public IEnumerable<PostDto> Posts { get; set; }
 	[Inject]
 	public IPostService PostService { get; set; }
 	private string APIErrorMessages;
@@ -72,7 +73,7 @@ else
 			}
 			else if (response.IsSuccessStatusCode)
 			{
-				Posts = await response.Content.ReadFromJsonAsync<IEnumerable<Post>>();
+				Posts = await response.Content.ReadFromJsonAsync<IEnumerable<PostDto>>();
 			}
 			else
 			{

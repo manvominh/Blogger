@@ -1,10 +1,10 @@
-﻿using Blogger.Domain.Entities;
+﻿using Blogger.Application.Dtos;
 
 namespace Blogger.Application.Interfaces.Repositories
 {
     public interface IRoleRepository
     {
-        Task<IEnumerable<Role>> GetAll();
-        Task<Role> GetRoleById(int roleId);
+        Task<IEnumerable<RoleDto>> GetAll();
+        Task<RoleDto> GetRoleById(int roleId);
     }
 }

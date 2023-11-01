@@ -3,11 +3,6 @@ using Blogger.Application.Interfaces.Repositories;
 using Blogger.Application.Interfaces.Services;
 using Blogger.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Blogger.Infrastructure.Services
 {
@@ -20,12 +15,12 @@ namespace Blogger.Infrastructure.Services
             _roleRepository = roleRepository;
             _unitOfWork = unitOfWork;
         }
-        public async Task<IEnumerable<Role>> GetAll()
+        public async Task<IEnumerable<RoleDto>> GetAll()
         {
             return await _roleRepository.GetAll();
         }
 
-        public async Task<Role> GetRoleById(int roleId)
+        public async Task<RoleDto> GetRoleById(int roleId)
         {
             return await _roleRepository.GetRoleById(roleId);
         }

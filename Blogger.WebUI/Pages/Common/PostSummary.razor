@@ -1,4 +1,4 @@
-﻿@using Blogger.Domain.Entities;
+﻿@using Blogger.Application.Dtos;
 @using System.Security.Claims;
 @foreach (var item in Posts)
 {
@@ -22,7 +22,7 @@
 }
 @code {
 	[Parameter]
-	public IEnumerable<Post> Posts { get; set; }
+	public IEnumerable<PostDto> Posts { get; set; }
 
 	public int CurrentUserId { get; set; }
 	[CascadingParameter]

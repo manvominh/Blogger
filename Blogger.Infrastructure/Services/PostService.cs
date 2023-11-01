@@ -2,11 +2,6 @@
 using Blogger.Application.Interfaces.Repositories;
 using Blogger.Application.Interfaces.Services;
 using Blogger.Domain.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Blogger.Infrastructure.Services
 {
@@ -19,26 +14,25 @@ namespace Blogger.Infrastructure.Services
             _postRepository = postRepository;
             _unitOfWork = unitOfWork;
         }
-        public async Task<IEnumerable<Post>> GetAll()
+        public async Task<IEnumerable<PostDto>> GetAll()
         {
             return await _postRepository.GetAll();
         }
 
-        public async Task<Post> GetPostById(int postId)
+        public async Task<PostDto> GetPostById(int postId)
         {
             return await _postRepository.GetPostById(postId);
         }
 
-        public async Task<IEnumerable<Post>> GetPostsByUserId(int userId)
+        public async Task<IEnumerable<PostDto>> GetPostsByUserId(int userId)
         {
             return await _postRepository.GetPostsByUserId(userId);
         }
 
-		public async Task<(bool IsPostSaved, Post post)> SavePost(PostDto postDto)
+		public async Task<(bool IsPostSaved, PostDto post)> SavePost(PostDto postDto)
 		{
             var post = new Post()
             {
-                Id = postDto.Id,
                 Title = postDto.Title,
                 Introduction = postDto.Introduction,
                 BodyText = postDto.BodyText,
@@ -49,19 +43,23 @@ namespace Blogger.Infrastructure.Services
             };
             await _unitOfWork.Repository<Post>().AddAsync(post);
             await _unitOfWork.Save();
-			return (true, post);
+            postDto.Id = post.Id;
+			return (true, postDto);
 		}
 
 		public async Task<(bool IsPostUpdated, string Message)> UpdatePost(PostDto postDto)
 		{
-            var post = await _postRepository.GetPostById(postDto.Id);
-            post.Title = postDto.Title;
-            post.Introduction = postDto.Introduction;
-            post.BodyText = postDto.BodyText;
-            post.ImageUrl = postDto.ImageUrl;
-            post.IsPublished = postDto.IsPublished;
-            post.UserId = postDto.UserId;
-			
+            var currentPostDto = await _postRepository.GetPostById(postDto.Id);
+            var post = new Post()
+            {
+                Id = currentPostDto.Id,
+                Title = currentPostDto.Title,
+                Introduction = currentPostDto.Introduction,
+                BodyText = currentPostDto.BodyText,
+                ImageUrl = currentPostDto.ImageUrl,
+                IsPublished = currentPostDto.IsPublished,
+                UserId = currentPostDto.UserId,
+            };
 			await _unitOfWork.Repository<Post>().UpdateAsync(post);
 			await _unitOfWork.Save();
 			return (true, "Success");

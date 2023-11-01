@@ -46,7 +46,7 @@ namespace Blogger.Persistence.Contexts
                 .WithMany(u => u.Comments)
                 .HasForeignKey(c => c.PostId)
                 .IsRequired();
-            
+
             // Role
             modelBuilder.Entity<Role>().HasData(new Role
             {

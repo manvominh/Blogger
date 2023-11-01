@@ -1,6 +1,6 @@
 ﻿@page "/roles"
 
-@using Blogger.Domain.Entities;
+@using Blogger.Application.Dtos;
 @using Blogger.Application.Interfaces.Services;
 @using Blogger.WebUI.Pages.Common;
 
@@ -51,7 +51,7 @@ else
     <!--Table-->
 }
 @code {
-    public IEnumerable<Role> roles { get; set; }
+    public IEnumerable<RoleDto> roles { get; set; }
     [Inject]
     public IRoleService RoleService { get; set; }
     [CascadingParameter] public IModalService Modal { get; set; } = default!;
@@ -96,7 +96,7 @@ else
         }
         else if (response.IsSuccessStatusCode)
         {
-            roles = await response.Content.ReadFromJsonAsync<IEnumerable<Role>>();
+            roles = await response.Content.ReadFromJsonAsync<IEnumerable<RoleDto>>();
         }
         else
         {
@@ -168,9 +168,9 @@ else
                 var response = await httpClient.DeleteAsync($"/api/Roles/{roleId}");
                 if (response.IsSuccessStatusCode)
                 {
-                    _toastService.ShowSuccess("Delete Role successfully");
                     await GetRoles();
                     StateHasChanged();
+                    _toastService.ShowSuccess("Delete Role successfully");
                 }
                 else
                     _toastService.ShowError("Delete Role failed");

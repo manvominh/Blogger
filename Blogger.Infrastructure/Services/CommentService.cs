@@ -25,12 +25,12 @@ namespace Blogger.Infrastructure.Services
             return true;
         }
 
-        public async Task<IEnumerable<Comment>> GetCommentsByPostId(int postId)
+        public async Task<IEnumerable<CommentDto>> GetCommentsByPostId(int postId)
         {
             return await _commentRepository.GetCommentsByPostId(postId);
         }
 
-        public async Task<(bool IsCommentSaved, Comment comment)> SaveComment(CommentDto commentDto)
+        public async Task<(bool IsCommentSaved, CommentDto comment)> SaveComment(CommentDto commentDto)
         {
             var comment = new Comment()
             {
@@ -41,7 +41,8 @@ namespace Blogger.Infrastructure.Services
             };
             await _unitOfWork.Repository<Comment>().AddAsync(comment);
             await _unitOfWork.Save();
-            return (true, comment);
+            commentDto.Id = comment.Id;
+            return (true, commentDto);
         }
     }
 }

@@ -3,7 +3,6 @@
 @using AutoMapper;
 @using Blogger.Application.Dtos;
 @using Blogger.Application.Interfaces.Services;
-@using Blogger.Domain.Entities;
 @using Blazored.TextEditor
 @using System.Security.Claims;
 @using Blogger.WebUI.Pages.Common;
@@ -192,8 +191,8 @@ else
 		{
 
 			_toastService.ShowSuccess("Save Post successfully");
-			var postInfo = await response.Content.ReadFromJsonAsync<Post>();
-			_navigationManager.NavigateTo($"/editpost/{postInfo.Id}");
+			var postInfo = await response.Content.ReadFromJsonAsync<PostDto>();
+			_navigationManager.NavigateTo($"/editpost/{postInfo?.Id}");
 		}
 		else
 		{

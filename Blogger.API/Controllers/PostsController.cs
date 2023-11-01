@@ -1,6 +1,5 @@
 ﻿using Blogger.Application.Dtos;
 using Blogger.Application.Interfaces.Services;
-using Blogger.Domain.Entities;
 using Blogger.Infrastructure.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -20,7 +19,7 @@ namespace Blogger.API.Controllers
 		}
 		[AllowAnonymous]
 		[HttpGet]
-		public async Task<IEnumerable<Post>> GetAllPosts()
+		public async Task<IEnumerable<PostDto>> GetAllPosts()
 		{
 			return await _postService.GetAll();
 		}

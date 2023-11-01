@@ -1,7 +1,7 @@
 ﻿@using AutoMapper;
 @using Blogger.Application.Dtos;
-@using Blogger.Domain.Entities;
 @using System.Security.Claims;
+@using Blogger.WebUI.Pages.Common;
 @attribute [Authorize(Roles = "Administrator")]
 @inject IHttpClientFactory _httpClientFactory
 @inject NavigationManager _navigationManager
@@ -89,7 +89,7 @@ else
 	[Parameter]
 	public int userId { get; set; }
 	UserDto userDto;
-	public IEnumerable<Role> roles { get; set; }
+	//public IEnumerable<RoleDto> roles { get; set; }
 	private EditContext editContext;
 	private string APIErrorMessages;	
 
@@ -127,8 +127,7 @@ else
 					}
 					else if (response.IsSuccessStatusCode)
 					{
-						var userInfo = await response.Content.ReadFromJsonAsync<User>();
-						userDto = _mapper.Map<UserDto>(userInfo);
+						userDto = await response.Content.ReadFromJsonAsync<UserDto>();
 					}
 					else
 					{
@@ -156,37 +155,39 @@ else
 		if (args.Key == "Enter")
 			await UpdateUser();
 	}
-	public async Task GetRoles()
-	{
-		var httpClient = _httpClientFactory.CreateClient("blog");
-		var response = await httpClient.GetAsync($"api/Roles/");
+	// public async Task GetRoles()
+	// {
+	// 	var httpClient = _httpClientFactory.CreateClient("blog");
+	// 	var response = await httpClient.GetAsync($"api/Roles/");
 
-		if (response.StatusCode == HttpStatusCode.BadRequest)
-		{
-			var errors = await response.Content.ReadFromJsonAsync<Dictionary<string, List<string>>>();
-			if (errors.Count > 0)
-			{
-				foreach (var item in errors)
-				{
-					foreach (var errorMessage in item.Value)
-					{
-						APIErrorMessages = !string.IsNullOrEmpty(APIErrorMessages) ? $"{APIErrorMessages} | {errorMessage}" : $"{errorMessage}";
-					}
-				}
-			}
-			_toastService.ShowError(APIErrorMessages);
-		}
-		else if (response.IsSuccessStatusCode)
-		{
-			roles = await response.Content.ReadFromJsonAsync<IEnumerable<Role>>();
-		}
-		else
-		{
-			_toastService.ShowError("Error on calling API");
-		}
-	}
+	// 	if (response.StatusCode == HttpStatusCode.BadRequest)
+	// 	{
+	// 		var errors = await response.Content.ReadFromJsonAsync<Dictionary<string, List<string>>>();
+	// 		if (errors.Count > 0)
+	// 		{
+	// 			foreach (var item in errors)
+	// 			{
+	// 				foreach (var errorMessage in item.Value)
+	// 				{
+	// 					APIErrorMessages = !string.IsNullOrEmpty(APIErrorMessages) ? $"{APIErrorMessages} | {errorMessage}" : $"{errorMessage}";
+	// 				}
+	// 			}
+	// 		}
+	// 		_toastService.ShowError(APIErrorMessages);
+	// 	}
+	// 	else if (response.IsSuccessStatusCode)
+	// 	{
+	// 		roles = await response.Content.ReadFromJsonAsync<IEnumerable<Role>>();
+	// 	}
+	// 	else
+	// 	{
+	// 		_toastService.ShowError("Error on calling API");
+	// 	}
+	// }
 	private async Task UpdateUser()
 	{
+		// temporary set null now will change later in new/edit mode
+		userDto.UserRoles = null;
 		var httpClient = _httpClientFactory.CreateClient("blog");
 		var response = await httpClient.PutAsJsonAsync<UserDto>("/api/Users", userDto);
 		if (response.StatusCode == HttpStatusCode.BadRequest)

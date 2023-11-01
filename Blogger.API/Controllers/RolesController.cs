@@ -1,9 +1,6 @@
 ﻿using Blogger.Application.Dtos;
 using Blogger.Application.Interfaces.Services;
-using Blogger.Domain.Entities;
-using Blogger.Infrastructure.Services;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Blogger.API.Controllers
@@ -20,7 +17,7 @@ namespace Blogger.API.Controllers
             _roleService = roleService;
         }
         [HttpGet]
-        public async Task<IEnumerable<Role>> GetAllRoles()
+        public async Task<IEnumerable<RoleDto>> GetAllRoles()
         {
             return await _roleService.GetAll();
         }

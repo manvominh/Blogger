@@ -2,6 +2,7 @@
 using Blogger.Application.Common.Mapping;
 using Blogger.Domain.Entities;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Blogger.Application.Dtos
 {
@@ -20,5 +21,6 @@ namespace Blogger.Application.Dtos
 		public DateTime? PublishedDate { get; set; }
 		public int UserId { get; set; }
 		public DateTime CreatedDate { get; set; }
-	}
+        public List<Comment>? Comments { get; set; }
+    }
 }
