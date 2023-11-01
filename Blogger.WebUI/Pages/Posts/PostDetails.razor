@@ -58,10 +58,10 @@ else
                         {
                             <div class="comment-form-wrap pt-5">
                                 <h3 class="mb-5">Leave a comment</h3>
-                                <EditForm Model="@commentModel" OnValidSubmit="@AddComment" class="p-5 bg-light">
-                                    <InputTextArea class="form-control" @bind-Value="@commentModel.CommentText" />
-                                    <ValidationMessage For="@(() => commentModel.CommentText)" />
-                                    <button type="submit" class="btn btn-primary">Add Comment</button>
+                                <EditForm Model="@commentDto" OnValidSubmit="@AddComment" class="p-5 bg-light">
+                                    <InputTextArea id="commentText" class="form-control" @oninput="() => EnableCommentButton()" @bind-Value="@commentDto.CommentText" />
+                                    <ValidationMessage For="@(() => commentDto.CommentText)" />
+                                    <button id="btnAddComment" type="submit" class="btn btn-primary" disabled="true">Add Comment</button>
                                 </EditForm>
                             </div>
                         }
@@ -102,8 +102,8 @@ else
         </div>
     </div>
 </section>
-   @*  <Blogger.WebUI.Pages.Addon.PopupConfirmation ConfirmedChanged="ShowPopupConfirmation" /> *@
 }
+
 @code {
     [Parameter]
     public int postId { get; set; }
@@ -114,7 +114,7 @@ else
     private Task<AuthenticationState> authenticationState { get; set; }
     private bool IsAuthenticated { get; set; }
     private int CurrentUserId { get; set; }
-    public CommentDto commentModel = new CommentDto();
+    public CommentDto commentDto = new CommentDto();
     private string APIErrorMessages;
 
     [CascadingParameter] public IModalService Modal { get; set; } = default!;
@@ -167,10 +167,10 @@ else
     {
         if(IsAuthenticated)
         {
-            commentModel.PostId = postId;
-            commentModel.UserId = CurrentUserId;
+            commentDto.PostId = postId;
+            commentDto.UserId = CurrentUserId;
             var httpClient = _httpClientFactory.CreateClient("blog");
-            var response = await httpClient.PostAsJsonAsync<CommentDto>("/api/Comments", commentModel);
+            var response = await httpClient.PostAsJsonAsync<CommentDto>("/api/Comments", commentDto);
             if (response.StatusCode == HttpStatusCode.BadRequest)
             {
                 var errors = await response.Content.ReadFromJsonAsync<Dictionary<string, List<string>>>();
@@ -189,8 +189,9 @@ else
             else if (response.IsSuccessStatusCode)
             {
                 _toastService.ShowSuccess("Save Comment Successfully.");
-                commentModel.CommentText = string.Empty;
+                commentDto.CommentText = string.Empty;
                 await GetPostDetails();
+                await JsRuntime.InvokeVoidAsync("DisableAddCommentButton");
                 StateHasChanged();
             }
             else
@@ -233,8 +234,8 @@ else
         }
        
     }
-    public void ShowPopupConfirmation(bool test)
+    public async Task EnableCommentButton()
     {
-        Console.WriteLine(test);
+        await JsRuntime.InvokeVoidAsync("MakeAddCommentButtonVisible");
     }
 }
