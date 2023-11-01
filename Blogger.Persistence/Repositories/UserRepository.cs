@@ -1,36 +1,46 @@
-﻿using Blogger.Application.Interfaces.Repositories;
+﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
+using Blogger.Application.Dtos;
+using Blogger.Application.Interfaces.Repositories;
 using Blogger.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using System.Threading;
 
 namespace Blogger.Persistence.Repositories
 {
     public class UserRepository : IUserRepository
     {
-        private readonly IGenericRepository<User> _userRepository;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IMapper _mapper;
 
-        public UserRepository(IGenericRepository<User> userRepository)
+        public UserRepository(IUnitOfWork unitOfWork, IMapper mapper)
         {
-            _userRepository = userRepository;
+            _unitOfWork = unitOfWork;
+            _mapper = mapper;
         }
-        public async Task<IEnumerable<User>> GetAll()
+        public async Task<IEnumerable<UserDto>> GetAll()
         {
-            return await _userRepository.GetAllAsync();
+            return await _unitOfWork.Repository<User>().Entities
+                .ProjectTo<UserDto>(_mapper.ConfigurationProvider)
+                .ToListAsync();
         }
 
-        public async Task<User> GetByEmail(string email)
+        public async Task<UserDto> GetByEmail(string email)
         {
-            return await _userRepository.Entities
+            return await _unitOfWork.Repository<User>().Entities
                 .Include(x => x.UserRoles)
                     .ThenInclude(userRole => userRole.Role)
+                .ProjectTo<UserDto>(_mapper.ConfigurationProvider)
                 .FirstOrDefaultAsync(x => x.Email == email && x.IsDeleted == false);
         }
 
-		public async Task<User> GetById(int userId)
+		public async Task<UserDto> GetById(int userId)
 		{
-			return await _userRepository.Entities
-				.Include(x => x.UserRoles)
+			return await _unitOfWork.Repository<User>().Entities
+                .Include(x => x.UserRoles)
 					.ThenInclude(userRole => userRole.Role)
-				.FirstOrDefaultAsync(x => x.Id == userId && x.IsDeleted == false);
+                .ProjectTo<UserDto>(_mapper.ConfigurationProvider)
+                .FirstOrDefaultAsync(x => x.Id == userId && x.IsDeleted == false);
 		}
 	}
 }

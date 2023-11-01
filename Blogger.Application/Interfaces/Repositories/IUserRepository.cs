@@ -1,11 +1,11 @@
-﻿using Blogger.Domain.Entities;
+﻿using Blogger.Application.Dtos;
 
 namespace Blogger.Application.Interfaces.Repositories
 {
     public interface IUserRepository
     {
-        Task<IEnumerable<User>> GetAll();
-        Task<User> GetByEmail(string email);
-		Task<User> GetById(int userId);
+        Task<IEnumerable<UserDto>> GetAll();
+        Task<UserDto> GetByEmail(string email);
+		Task<UserDto> GetById(int userId);
 	}
 }

@@ -17,7 +17,7 @@ namespace Blogger.Infrastructure.Services
         public const string JWT_SECURITY_KEY = "yPkCqn4kSWLtaJwXvN2jGzpQRyTZ3gdXkt7FeBJP";
         public const int JWT_TOKEN_VALIDITY_MINS = 20;
 
-        public Task<Tokens> GenerateJwtToken(User user)
+        public Task<Tokens> GenerateJwtToken(UserDto user)
         {
             ///* Validating the User Credentials */
             if (user == null)

@@ -26,5 +26,6 @@ namespace Blogger.Application.Dtos
         public string? Address { get; set; }
 		//public string RefreshToken { get; set; }
 		public bool IsDeleted { get; set; }
-	}
+        public List<UserRole> UserRoles { get; set; }
+    }
 }

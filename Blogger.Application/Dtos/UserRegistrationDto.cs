@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Blogger.Application.Dtos
 {
-    public class UserRegistrationDto : IMapFrom<User>
+    public class UserRegistrationDto : IMapFrom<UserDto>
     {
         public int Id { get; set; } = 0;
         [Required(ErrorMessage = "Please enter Email.")]
@@ -30,7 +30,7 @@ namespace Blogger.Application.Dtos
 		public string FirstName { get; set; }
         [Required(ErrorMessage = "Please enter Last Name.")]
         [Display(Name = "Last Name")]
-		[MaxLength(10, ErrorMessage = "Gender cannot be longer than 10 characters.")]
+		[MaxLength(50, ErrorMessage = "Last Name cannot be longer than 50 characters.")]
 		public string LastName { get; set; }
 
         [Required(ErrorMessage = "Please choose Gender.")]

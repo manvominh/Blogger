@@ -21,7 +21,7 @@ namespace Blogger.API.Controllers
         }
         [HttpGet]
         [Authorize]
-        public async Task<IEnumerable<User>> GetAllUsers()
+        public async Task<IEnumerable<UserDto>> GetAllUsers()
         {
             return await _userService.GetAll();
         }

@@ -4,16 +4,7 @@ using Blogger.Application.Interfaces.Repositories;
 using Blogger.Application.Interfaces.Services;
 using Blogger.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.ComponentModel.Design;
-using System.Data;
-using System.Linq;
-using System.Security.Claims;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace Blogger.Infrastructure.Services
 {
@@ -35,17 +26,17 @@ namespace Blogger.Infrastructure.Services
             throw new NotImplementedException();
         }
 
-        public async Task<IEnumerable<User>> GetAll()
+        public async Task<IEnumerable<UserDto>> GetAll()
         {
             return await _userRepository.GetAll();
         }
 
-        public async Task<User> GetByEmail(string email)
+        public async Task<UserDto> GetByEmail(string email)
         {
             return await _userRepository.GetByEmail(email);
         }
 
-		public async Task<User> GetUserById(int userId)
+		public async Task<UserDto> GetUserById(int userId)
 		{
 			return await _userRepository.GetById(userId);
 		}
@@ -94,13 +85,18 @@ namespace Blogger.Infrastructure.Services
 			{
 				return (false, "Email does not exist. Update Profile Error.");
 			}
-            existedUser.Password = BCrypt.Net.BCrypt.HashPassword(userRegistration.Password);
-            existedUser.FirstName = userRegistration.FirstName;
-            existedUser.LastName = userRegistration.LastName;
-            existedUser.Gender = userRegistration.Gender;
-            existedUser.DateOfBirth = userRegistration.DateOfBirth;
-            existedUser.Address = userRegistration.Address;
-            await _unitOfWork.Repository<User>().UpdateAsync(existedUser);
+            var user = new User()
+            {
+                Id = existedUser.Id,
+                Email = userRegistration.Email,
+                Password = userRegistration.Password,
+                FirstName = userRegistration.FirstName,
+                LastName = existedUser.LastName,
+                Gender = userRegistration.Gender,
+                DateOfBirth = userRegistration.DateOfBirth,
+                Address = userRegistration.Address,
+            };
+            await _unitOfWork.Repository<User>().UpdateAsync(user);
 			await _unitOfWork.Save();
 			return (true, "Success");
 		}

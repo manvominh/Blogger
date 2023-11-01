@@ -27,7 +27,7 @@ namespace Blogger.WebUI
 
         public async override Task<AuthenticationState> GetAuthenticationStateAsync()
         {
-            User? user = await GetUserByJWTAsync();
+            UserDto? user = await GetUserByJWTAsync();
 
             if (user != null && user.Email != null)
             {
@@ -52,7 +52,7 @@ namespace Blogger.WebUI
                 return await Task.FromResult(new AuthenticationState(_anonymous));
         }
 
-        public async Task<User?> GetUserByJWTAsync()
+        public async Task<UserDto?> GetUserByJWTAsync()
         {
             //pulling the token from localStorage
             var jwtToken = await _localStorageService.GetItemAsync<string>("jwt_token");
@@ -65,7 +65,7 @@ namespace Blogger.WebUI
 
 			var httpClient = _httpClientFactory.CreateClient("blog");
 			var response = await httpClient.GetAsync($"/api/Users/GetUserDetailsByEmail/{email}");
-			var user = await response.Content.ReadFromJsonAsync<User>();
+			var user = await response.Content.ReadFromJsonAsync<UserDto>();
             return user;
         }
         public void NotifyAuthState()
