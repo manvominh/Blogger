@@ -25,7 +25,7 @@ namespace Blogger.Persistence.Repositories
                 .ToListAsync();
         }
 
-        public async Task<UserDto> GetByEmail(string email)
+        public async Task<UserDto> GetUserByEmail(string email)
         {
             return await _unitOfWork.Repository<User>().Entities
                 .Include(x => x.UserRoles)
@@ -34,7 +34,7 @@ namespace Blogger.Persistence.Repositories
                 .FirstOrDefaultAsync(x => x.Email == email && x.IsDeleted == false);
         }
 
-		public async Task<UserDto> GetById(int userId)
+		public async Task<UserDto> GetUserById(int userId)
 		{
 			return await _unitOfWork.Repository<User>().Entities
                 .Include(x => x.UserRoles)

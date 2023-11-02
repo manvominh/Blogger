@@ -6,7 +6,7 @@ namespace Blogger.Application.Interfaces.Services
     {
         Task<IEnumerable<UserDto>> GetAll();
 		Task<UserDto> GetUserById(int userId);
-		Task<UserDto> GetByEmail(string email);
+		Task<UserDto> GetUserByEmail(string email);
 		Task<(bool IsSavedOrUpdatedUser, string Message)> SaveOrUpdateUser(UserDto userDto);
 		Task<bool> DeleteUser(int userId);
 		Task<(bool IsUpdatedProfile, string Message)> UpdateProfile(UserRegistrationDto userRegistration);

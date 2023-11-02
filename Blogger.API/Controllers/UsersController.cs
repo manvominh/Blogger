@@ -1,4 +1,5 @@
-﻿using Blogger.Application.Dtos;
+﻿using Azure;
+using Blogger.Application.Dtos;
 using Blogger.Application.Interfaces.Services;
 using Blogger.Domain.Entities;
 using Blogger.Infrastructure.Services;
@@ -17,13 +18,15 @@ namespace Blogger.API.Controllers
 
         public UsersController(IUserService userService)
         {
-            _userService = userService;
-        }
+            //_userService = userService;
+			_userService = userService ?? throw new ArgumentNullException(nameof(userService));
+		}
         [HttpGet]
         [Authorize]
-        public async Task<IEnumerable<UserDto>> GetAllUsers()
-        {
-            return await _userService.GetAll();
+        public async Task<IActionResult> GetAllUsers()
+		{
+			var response = await _userService.GetAll();
+			return response != null ? Ok(response) : NotFound();
         }
         [HttpPost]
         [AllowAnonymous]
@@ -54,26 +57,26 @@ namespace Blogger.API.Controllers
         }
 		[AllowAnonymous]
 		[HttpGet("{userId}")]
-		public async Task<IActionResult> GetUser(int userId)
+		public async Task<IActionResult> GetUserById(int userId)
 		{
 			var result = await _userService.GetUserById(userId);
 			if (result != null)
 			{
 				return Ok(result);
 			}
-			ModelState.AddModelError("GetUserError", "Get User Details error.");
+			ModelState.AddModelError("GetUserByIdError", "Get User By Id Details error.");
 			return BadRequest(ModelState);
 		}
 		[AllowAnonymous]
-        [HttpGet("GetUserDetailsByEmail/{email}")]
-        public async Task<IActionResult> GetUserDetailsByEmail(string email)
+        [HttpGet("GetUserByEmail/{email}")]
+        public async Task<IActionResult> GetUserByEmail(string email)
         {
-            var result = await _userService.GetByEmail(email);
+            var result = await _userService.GetUserByEmail(email);
             if (result != null)
             {
                 return Ok(result);
             }
-            ModelState.AddModelError("GetUserDetailsError", "Invalid Email information");
+            ModelState.AddModelError("GetUserByEmailError", "Get User By Email Details error.");
             return BadRequest(ModelState);
         }
 		[Authorize]

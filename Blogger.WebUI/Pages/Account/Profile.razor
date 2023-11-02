@@ -107,7 +107,7 @@ else
 			{
 				var email = user.FindFirst(ClaimTypes.Email)?.Value;
 				var httpClient = _httpClientFactory.CreateClient("blog");
-				var response = await httpClient.GetAsync($"/api/Users/GetUserDetailsByEmail/{email}");
+				var response = await httpClient.GetAsync($"/api/Users/GetUserByEmail/{email}");
 
 				if (response.StatusCode == HttpStatusCode.BadRequest)
 				{

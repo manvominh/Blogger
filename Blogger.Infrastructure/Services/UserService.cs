@@ -31,14 +31,14 @@ namespace Blogger.Infrastructure.Services
             return await _userRepository.GetAll();
         }
 
-        public async Task<UserDto> GetByEmail(string email)
+        public async Task<UserDto> GetUserByEmail(string email)
         {
-            return await _userRepository.GetByEmail(email);
+            return await _userRepository.GetUserByEmail(email);
         }
 
 		public async Task<UserDto> GetUserById(int userId)
 		{
-			return await _userRepository.GetById(userId);
+			return await _userRepository.GetUserById(userId);
 		}
 
 		public async Task<(bool IsLoginSuccess, Tokens JwtTokens)> Login(LoginDto loginDto)
@@ -48,7 +48,7 @@ namespace Blogger.Infrastructure.Services
                 return (false, null);
             }
 
-            var user = await _userRepository.GetByEmail(loginDto.Email);
+            var user = await _userRepository.GetUserByEmail(loginDto.Email);
 
             if (user == null) { return (false, null); }
 
@@ -66,7 +66,7 @@ namespace Blogger.Infrastructure.Services
 
         public async Task<(bool IsUserRegistered, string Message)> Register(UserRegistrationDto userRegistration)
         {
-            var existedUser = await _userRepository.GetByEmail(userRegistration.Email);
+            var existedUser = await _userRepository.GetUserByEmail(userRegistration.Email);
             if (existedUser != null)
             {
                 return (false, "Email Address  already registered. Please re-enter email address.");
@@ -80,7 +80,7 @@ namespace Blogger.Infrastructure.Services
 
 		public async Task<(bool IsUpdatedProfile, string Message)> UpdateProfile(UserRegistrationDto userRegistration)
 		{
-			var existedUser = await _userRepository.GetByEmail(userRegistration.Email);
+			var existedUser = await _userRepository.GetUserByEmail(userRegistration.Email);
 			if (existedUser == null)
 			{
 				return (false, "Email does not exist. Update Profile Error.");

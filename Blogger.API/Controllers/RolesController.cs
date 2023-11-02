@@ -17,10 +17,11 @@ namespace Blogger.API.Controllers
             _roleService = roleService;
         }
         [HttpGet]
-        public async Task<IEnumerable<RoleDto>> GetAllRoles()
+        public async Task<IActionResult> GetAllRoles()
         {
-            return await _roleService.GetAll();
-        }
+            var response = await _roleService.GetAll();
+			return response != null ? Ok(response) : NotFound();
+		}
         [HttpGet("{roleId}")]
         public async Task<IActionResult> GetRoleById(int roleId)
         {
