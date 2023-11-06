@@ -1,16 +1,12 @@
 ﻿using AutoFixture;
-using Azure.Core;
 using Blogger.API.Controllers;
 using Blogger.Application.Dtos;
 using Blogger.Application.Interfaces.Services;
 using FluentAssertions;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.VisualStudio.TestPlatform.CommunicationUtilities;
 using Moq;
-using Xunit.Sdk;
 
-namespace BloggerController.Tests.Controllers
+namespace Blogger.API.Tests.Controllers
 {
     public class UsersControllerTest
     {

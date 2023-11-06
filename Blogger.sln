@@ -23,7 +23,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Blogger.WebUI", "Blogger.We
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Test", "Test", "{B9263F78-2C52-430A-809E-05B61E6C33AD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BloggerController.Tests", "BloggerController.Tests\BloggerController.Tests.csproj", "{49B63A7F-46A1-48D4-BFA8-C84080D40624}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Blogger.API.Tests", "BloggerController.Tests\Blogger.API.Tests.csproj", "{49B63A7F-46A1-48D4-BFA8-C84080D40624}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
