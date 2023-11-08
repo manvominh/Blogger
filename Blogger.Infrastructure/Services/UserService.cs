@@ -4,6 +4,7 @@ using Blogger.Application.Interfaces.Repositories;
 using Blogger.Application.Interfaces.Services;
 using Blogger.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 
 namespace Blogger.Infrastructure.Services
@@ -16,12 +17,12 @@ namespace Blogger.Infrastructure.Services
         public UserService(IUserRepository userRepository, IUnitOfWork unitOfWork
             , IJwtAuthenticationManagerService jwtAuthenticationManagerService)
         {
-            _userRepository = userRepository;
-            _unitOfWork = unitOfWork;
-            _jwtAuthenticationManagerService = jwtAuthenticationManagerService;
-        }
+			_userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
+			_unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+			_jwtAuthenticationManagerService = jwtAuthenticationManagerService ?? throw new ArgumentNullException(nameof(jwtAuthenticationManagerService));
+		}
 
-        public bool CheckUserUniqueEmail(string email)
+		public bool CheckUserUniqueEmail(string email)
         {
             throw new NotImplementedException();
         }
