@@ -1,4 +1,4 @@
-1. This is a Blogger Web Application that implemented in Blazor Web Assembly + Web API + MS SQL Server with Entity Framework Core + Clean Architecture + Repository + Unit Of Work pattern.
+1. This is a Blogger Web Application that implemented in Blazor Web Assembly + Web API + MS SQL Server with Entity Framework Core + Clean Architecture + Repository + Unit Of Work pattern + Authentication using JWTBearer Token.
 
 This web application use some Nuget Packages as following:
 
