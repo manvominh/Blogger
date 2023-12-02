@@ -50,5 +50,6 @@ This web application use some Nuget Packages as following:
     * modify profile
     * create + edit + comment + publish post
 - Administrator can manage users + roles in Blogger system.
-5. Video introduce source code + main feature:
-  
+5. The Blogger API is deployed on Azure Web App service:
+  ![Blogger_API_on_Azure_WebApp](https://github.com/manvominh/Blogger/assets/133474782/48906237-5390-4a4b-8bfd-d367a924fd62)
+
