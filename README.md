@@ -1,4 +1,4 @@
-1. This is a Blogger Web Application that implemented in Blazor Web Assembly + Web API with Clean Architecture + Repository + Unit Of Work pattern.
+1. This is a Blogger Web Application that implemented in Blazor Web Assembly + Web API + MS SQL Server with Entity Framework Core + Clean Architecture + Repository + Unit Of Work pattern + Authentication using JWTBearer Token.
 
 This web application use some Nuget Packages as following:
 
@@ -50,5 +50,9 @@ This web application use some Nuget Packages as following:
     * modify profile
     * create + edit + comment + publish post
 - Administrator can manage users + roles in Blogger system.
-5. Video introduce source code + main feature:
-  
+5. The Blogger API Swagger is deployed on Azure Web App service + Azure SQL Database for demo purpose as below link on youtube:
+ - https://www.youtube.com/watch?v=KcNfEsYT5yg
+  - The font-end Blazor will be updated later. 
+ - The image of successful deployment on Azure Cloud:
+![Blogger_API_on_Azure_WebApp](https://github.com/manvominh/Blogger/assets/133474782/88be9452-6730-4bb4-bfe1-24d167b53478)
+
