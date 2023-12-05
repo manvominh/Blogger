@@ -15,9 +15,10 @@ builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
 //builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("http://localhost:5186") });
+var uri = builder.Configuration.GetSection("Api")["uri"];
 builder.Services.AddHttpClient("blog", options =>
 {
-	options.BaseAddress = new Uri("http://localhost:5186/");
+	options.BaseAddress = new Uri(uri);
 }).AddHttpMessageHandler<CustomAuthorizationHandler>();
 
 // Add services to the container.

@@ -361,3 +361,6 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/bloggerapp.png
+/Blogger_API_on_Azure_WebApp.png
+/Config_On_Azure.txt
