@@ -50,7 +50,7 @@ This web application use some Nuget Packages as following:
     * modify profile
     * create + edit + comment + publish post
 - Administrator can manage users + roles in Blogger system.
-### The Blogger application is deployed on Azure Web App service + Azure SQL Database for demo purpose as below link on youtube:
+### Deployment: the Blogger application is deployed on Azure Web App service + Azure SQL Database for demo purpose as below link on youtube:
  * The back-end Blogger API Swagger: https://youtu.be/KcNfEsYT5yg
  * The font-end Blazor Web Assembly Blogger UI: https://youtu.be/Qw9xq-DSKlE 
  * The image of successful deployment on Azure Cloud:
