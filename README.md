@@ -36,11 +36,11 @@ This web application use some Nuget Packages as following:
 
 * Blazored.TextEditor" Version="1.1.0"
 
-# Structure of Blogger Application:
+### Structure of Blogger Application:
    
    ![image](https://github.com/manvominh/Blogger/assets/133474782/1cf4c1b8-303a-4c2e-b64e-3c3947234597)
    
- # Some main functions of Blogger web application:
+### Some main functions of Blogger web application:
 - There are 2 roles in system: Administrator + User
     * User: can manage user's post including: new + edit + publish owner post and comment on any published post
     * Administrator: including User role + administrate system such as: manage users + roles in Blogger system
@@ -50,7 +50,7 @@ This web application use some Nuget Packages as following:
     * modify profile
     * create + edit + comment + publish post
 - Administrator can manage users + roles in Blogger system.
-# The Blogger application is deployed on Azure Web App service + Azure SQL Database for demo purpose as below link on youtube:
+### The Blogger application is deployed on Azure Web App service + Azure SQL Database for demo purpose as below link on youtube:
  * The back-end Blogger API Swagger: https://youtu.be/KcNfEsYT5yg
  * The font-end Blazor Web Assembly Blogger UI: https://youtu.be/Qw9xq-DSKlE 
  * The image of successful deployment on Azure Cloud:
